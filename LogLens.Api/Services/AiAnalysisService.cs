@@ -67,15 +67,31 @@ public class AiAnalysisService(
             analysis.GroupKey = group.GroupKey;
             return analysis;
         }
-        catch (Exception ex)
+        catch (OperationCanceledException)
         {
-            logger.LogError(ex, "Failed to analyze group {GroupKey}", group.GroupKey);
+            // Preserve cancellation semantics
+            throw;
+        }
+        catch (HttpRequestException ex)
+        {
+            logger.LogError(ex, "HTTP error while analyzing group {GroupKey}", group.GroupKey);
             return new AiGroupAnalysis
             {
                 GroupKey = group.GroupKey,
                 Severity = "MEDIUM",
-                RootCause = "AI analysis unavailable.",
-                SuggestedFix = "Review the stack trace manually."
+                RootCause = "AI analysis unavailable due to HTTP error.",
+                SuggestedFix = "Review the stack trace and HTTP connectivity manually."
+            };
+        }
+        catch (JsonException ex)
+        {
+            logger.LogError(ex, "Failed to parse AI analysis response for group {GroupKey}", group.GroupKey);
+            return new AiGroupAnalysis
+            {
+                GroupKey = group.GroupKey,
+                Severity = "MEDIUM",
+                RootCause = "AI analysis unavailable due to invalid response.",
+                SuggestedFix = "Review the stack trace and raw AI response manually."
             };
         }
     }
