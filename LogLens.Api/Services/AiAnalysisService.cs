@@ -1,0 +1,82 @@
+using System.Text.Json;
+using LogLens.Api.Models.Responses;
+using LogLens.Core.Models;
+
+namespace LogLens.Api.Services;
+
+public class AiAnalysisService(
+    IConfiguration config,
+    IHttpClientFactory http,
+    ILogger<AiAnalysisService> logger)
+{
+    private const string Model = "claude-sonnet-4-20250514";
+    private const string ApiUrl = "https://api.anthropic.com/v1/messages";
+
+    public async Task<List<AiGroupAnalysis>> AnalyzeGroupsAsync(
+        List<ErrorGroup> groups, CancellationToken ct = default)
+    {
+        var relevant = groups
+            .Where(g => g.Level is LogLens.Core.Models.LogLevel.Error or LogLens.Core.Models.LogLevel.Fatal)
+            .Take(10).ToList();
+        if (!relevant.Any()) return [];
+        var tasks = relevant.Select(g => AnalyzeGroupAsync(g, ct));
+        return (await Task.WhenAll(tasks)).ToList();
+    }
+
+    private async Task<AiGroupAnalysis> AnalyzeGroupAsync(
+        ErrorGroup group, CancellationToken ct)
+    {
+        try
+        {
+            var client = http.CreateClient();
+            client.DefaultRequestHeaders.Add("x-api-key", config["Claude:ApiKey"]);
+            client.DefaultRequestHeaders.Add("anthropic-version", "2023-06-01");
+
+            var samples = group.Entries.Take(3).Select(e => e.RawLine);
+            var prompt = $$"""
+                You are a senior software engineer analyzing application logs.
+                Respond in JSON only — no preamble, no markdown.
+
+                Error type: {{group.ExceptionType ?? "Unknown"}}
+                Occurrences: {{group.Count}}
+                First seen: {{group.FirstSeen}} | Last seen: {{group.LastSeen}}
+                Message: {{group.RepresentativeMessage}}
+                Samples:
+                {{string.Join('\n', samples)}}
+                Stack trace: {{group.Entries.FirstOrDefault()?.StackTrace ?? "none"}}
+
+                Respond ONLY with:
+                {
+                  "severity": "LOW|MEDIUM|HIGH|CRITICAL",
+                  "rootCause": "1-2 sentence explanation",
+                  "suggestedFix": "Concrete steps to fix (max 5)"
+                }
+                """;
+
+            var response = await client.PostAsJsonAsync(ApiUrl, new {
+                model = Model, max_tokens = 400,
+                messages = new[] { new { role = "user", content = prompt } }
+            }, ct);
+
+            response.EnsureSuccessStatusCode();
+            var result = await response.Content.ReadFromJsonAsync<JsonElement>(ct);
+            var json = result.GetProperty("content")[0].GetProperty("text").GetString() ?? "{}";
+
+            var analysis = JsonSerializer.Deserialize<AiGroupAnalysis>(json,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
+            analysis.GroupKey = group.GroupKey;
+            return analysis;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to analyze group {GroupKey}", group.GroupKey);
+            return new AiGroupAnalysis
+            {
+                GroupKey = group.GroupKey,
+                Severity = "MEDIUM",
+                RootCause = "AI analysis unavailable.",
+                SuggestedFix = "Review the stack trace manually."
+            };
+        }
+    }
+}

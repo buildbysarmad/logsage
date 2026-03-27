@@ -39,3 +39,20 @@ jobs:
         with:
           name: coverage
           path: ./coverage
+
+  build-and-test-api:
+    name: API — Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore
+        run: dotnet restore LogLens.Api/LogLens.Api.csproj
+
+      - name: Build
+        run: dotnet build LogLens.Api/LogLens.Api.csproj --no-restore --configuration Release
