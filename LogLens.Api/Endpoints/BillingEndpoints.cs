@@ -26,8 +26,11 @@ public static class BillingEndpoints
     private static async Task<IResult> HandleWebhook(
         HttpRequest request, StripeService stripe)
     {
-        var json = await new StreamReader(request.Body).ReadToEndAsync();
-        await stripe.HandleWebhookAsync(json, request.Headers["Stripe-Signature"].ToString());
+        using (var reader = new StreamReader(request.Body, leaveOpen: true))
+        {
+            var json = await reader.ReadToEndAsync();
+            await stripe.HandleWebhookAsync(json, request.Headers["Stripe-Signature"].ToString());
+        }
         return Results.Ok();
     }
 
