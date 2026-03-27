@@ -1,0 +1,43 @@
+# .NET
+bin/
+obj/
+*.user
+.vs/
+*.suo
+appsettings.Development.json
+
+# Node
+node_modules/
+.next/
+out/
+.env
+.env.local
+.env.production
+
+# Docker
+.env
+
+# Coverage
+coverage/
+*.lcov
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code context and build strategy files (keep local only)
+LOGLENS_PHASES.md
+CONTEXT.md
+CLAUDE_CODE_PROMPT.md
+.claude/
+
+# GitHub workflow meta files (keep local only)
+.github/PULL_REQUEST_TEMPLATE.md
+.github/ISSUE_TEMPLATE/
+.github/ISSUE_TEMPLATE/bug_report.md
+.github/ISSUE_TEMPLATE/feature_request.md
+/.obsidian
+/.obsidian/app.json
+/.obsidian/appearance.json
+/.obsidian/core-plugins.json
+/.obsidian/workspace.json

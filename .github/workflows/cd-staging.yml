@@ -1,0 +1,13 @@
+name: CD — Staging
+
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  deploy-staging:
+    name: Deploy to staging (skipped — not configured yet)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip — Railway not configured yet
+        run: echo "Staging deployment will be configured in Phase 6"
