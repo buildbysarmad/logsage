@@ -22,10 +22,12 @@ public class FormatDetector
     {
         var sample = string.Join('\n', rawLog.Split('\n').Take(30));
 
-        foreach (var parser in _parsers.SkipLast(1))
-            if (parser.CanParse(sample)) return parser;
+        var parser = _parsers
+            .SkipLast(1)
+            .Where(p => p.CanParse(sample))
+            .FirstOrDefault() ?? _parsers.Last();
 
-        return _parsers.Last();
+        return parser;
     }
 
     public string DetectFormatName(string rawLog) => Detect(rawLog).FormatName;
