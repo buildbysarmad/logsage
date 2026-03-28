@@ -11,10 +11,25 @@ public static class AnalyzeEndpoints
 {
     public static void MapAnalyzeEndpoints(this WebApplication app)
     {
-        app.MapPost("/api/analyze", AnalyzeText);
-        app.MapPost("/api/analyze/upload", AnalyzeFile).DisableAntiforgery();
-        app.MapGet("/api/sessions", GetSessions).RequireAuthorization();
-        app.MapGet("/api/sessions/{id:guid}", GetSession).RequireAuthorization();
+        app.MapPost("/api/analyze", AnalyzeText)
+           .WithTags("Analyze")
+           .WithSummary("Analyze log text — free tier, no auth required")
+           .WithDescription("Free: 3/day, 500 lines max. Pro: unlimited with AI root cause analysis.");
+
+        app.MapPost("/api/analyze/upload", AnalyzeFile)
+           .WithTags("Analyze")
+           .WithSummary("Analyze log file upload — free tier, no auth required")
+           .DisableAntiforgery();
+
+        app.MapGet("/api/sessions", GetSessions)
+           .WithTags("Sessions")
+           .WithSummary("Get session history — auth required")
+           .RequireAuthorization();
+
+        app.MapGet("/api/sessions/{id:guid}", GetSession)
+           .WithTags("Sessions")
+           .WithSummary("Get single session by ID — auth required")
+           .RequireAuthorization();
     }
 
     private static async Task<IResult> AnalyzeText(

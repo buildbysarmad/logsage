@@ -15,11 +15,11 @@ public static class AuthEndpoints
 {
     public static void MapAuthEndpoints(this WebApplication app)
     {
-        app.MapPost("/api/auth/register", Register);
-        app.MapPost("/api/auth/login", Login);
-        app.MapPost("/api/auth/refresh", Refresh);
-        app.MapPost("/api/auth/logout", Logout);
-        app.MapGet("/api/auth/me", Me).RequireAuthorization();
+        app.MapPost("/api/auth/register", Register).WithTags("Auth").WithSummary("Register a new account");
+        app.MapPost("/api/auth/login", Login).WithTags("Auth").WithSummary("Login and receive JWT tokens");
+        app.MapPost("/api/auth/refresh", Refresh).WithTags("Auth").WithSummary("Refresh access token using refresh token");
+        app.MapPost("/api/auth/logout", Logout).WithTags("Auth").WithSummary("Revoke refresh token");
+        app.MapGet("/api/auth/me", Me).WithTags("Auth").WithSummary("Get current authenticated user").RequireAuthorization();
     }
 
     private static async Task<IResult> Register(
