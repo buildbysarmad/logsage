@@ -1,7 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: nuget
-    directory: /loglens-backend
+    directory: /logsage-backend
     schedule:
       interval: weekly
       day: monday
@@ -9,7 +9,7 @@ updates:
     labels: [dependencies, dotnet]
 
   - package-ecosystem: npm
-    directory: /loglens-web
+    directory: /logsage-web
     schedule:
       interval: weekly
       day: monday
