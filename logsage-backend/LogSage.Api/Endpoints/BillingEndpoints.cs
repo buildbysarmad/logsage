@@ -6,9 +6,9 @@ public static class BillingEndpoints
 {
     public static void MapBillingEndpoints(this WebApplication app)
     {
-        app.MapPost("/api/billing/checkout", CreateCheckout).RequireAuthorization();
-        app.MapPost("/api/billing/webhook", HandleWebhook);
-        app.MapGet("/api/billing/portal", GetPortal).RequireAuthorization();
+        app.MapPost("/api/billing/checkout", CreateCheckout).WithTags("Billing").WithSummary("Create Paddle checkout session").RequireAuthorization();
+        app.MapPost("/api/billing/webhook", HandleWebhook).WithTags("Billing").WithSummary("Paddle webhook events handler");
+        app.MapGet("/api/billing/portal", GetPortal).WithTags("Billing").WithSummary("Get Paddle billing portal URL").RequireAuthorization();
     }
 
     private static async Task<IResult> CreateCheckout(

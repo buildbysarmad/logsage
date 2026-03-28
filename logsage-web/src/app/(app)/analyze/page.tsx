@@ -62,7 +62,7 @@ export default function AnalyzePage() {
     return (
       <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-8">
         <h1 className="text-3xl font-semibold text-white mb-2">
-          log<span className="text-emerald-400">lens</span>
+          log<span className="text-emerald-400">sage</span>
         </h1>
         <p className="text-gray-400 mb-8 text-sm">
           Paste your logs. Know what broke. In 10 seconds.
@@ -138,7 +138,7 @@ export default function AnalyzePage() {
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-800 bg-gray-900 shrink-0">
         <span className="font-semibold text-white text-sm">
-          log<span className="text-emerald-400">lens</span>
+          log<span className="text-emerald-400">sage</span>
         </span>
         <div className="flex items-center gap-3 text-xs text-gray-400">
           <span className="bg-gray-800 px-2 py-0.5 rounded">{result.detectedFormat}</span>
@@ -165,7 +165,7 @@ export default function AnalyzePage() {
           onSelect={setSelected}
         />
         <LogDetailPanel group={selected} />
-        <AiAnalysisPanel analysis={aiForSelected ?? null} group={selected} />
+        {false && <AiAnalysisPanel analysis={aiForSelected ?? null} group={selected} />}
       </div>
     </div>
   );

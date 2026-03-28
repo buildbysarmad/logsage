@@ -28,7 +28,7 @@ export default function LandingPage() {
       {/* Nav */}
       <nav className="flex items-center justify-between px-6 py-4 border-b border-gray-800 max-w-6xl mx-auto">
         <span className="text-xl font-semibold text-white">
-          log<span className="text-emerald-400">lens</span>
+          log<span className="text-emerald-400">sage</span>
         </span>
         <div className="flex items-center gap-4">
           <Link href="/pricing" className="text-sm text-gray-400 hover:text-white transition-colors">
@@ -142,7 +142,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-gray-800 py-8 text-center text-gray-600 text-sm">
         <p>
-          log<span className="text-emerald-400">lens</span>.io — built by{' '}
+          log<span className="text-emerald-400">sage</span>.io — built by{' '}
           <span className="text-gray-500">buildbysarmad</span>
         </p>
       </footer>
