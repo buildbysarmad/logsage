@@ -165,7 +165,7 @@ export default function AnalyzePage() {
           onSelect={setSelected}
         />
         <LogDetailPanel group={selected} />
-        <AiAnalysisPanel analysis={aiForSelected ?? null} group={selected} />
+        {false && <AiAnalysisPanel analysis={aiForSelected ?? null} group={selected} />}
       </div>
     </div>
   );
