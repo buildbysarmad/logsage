@@ -27,7 +27,7 @@ Thumbs.db
 
 # Claude Code context and build strategy files (keep local only)
 CLAUDE.md
-LogSage_PHASES.md
+LOGSAGE_PHASES.md
 CONTEXT.md
 CLAUDE_CODE_PROMPT.md
 CLAUDE_CODE_SETUP.md
