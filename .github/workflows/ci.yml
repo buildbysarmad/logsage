@@ -21,14 +21,14 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: Restore
-        run: dotnet restore LogLens.Core/LogLens.Core.csproj
+        run: dotnet restore loglens-backend/LogLens.Core/LogLens.Core.csproj
 
       - name: Build
-        run: dotnet build LogLens.Core/LogLens.Core.csproj --no-restore --configuration Release
+        run: dotnet build loglens-backend/LogLens.Core/LogLens.Core.csproj --no-restore --configuration Release
 
       - name: Test
         run: |
-          dotnet test LogLens.Core.Tests/LogLens.Core.Tests.csproj \
+          dotnet test loglens-backend/LogLens.Core.Tests/LogLens.Core.Tests.csproj \
             --configuration Release \
             --collect:"XPlat Code Coverage" \
             --results-directory ./coverage \
@@ -52,7 +52,7 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: Restore
-        run: dotnet restore LogLens.Api/LogLens.Api.csproj
+        run: dotnet restore loglens-backend/LogLens.Api/LogLens.Api.csproj
 
       - name: Build
-        run: dotnet build LogLens.Api/LogLens.Api.csproj --no-restore --configuration Release
+        run: dotnet build loglens-backend/LogLens.Api/LogLens.Api.csproj --no-restore --configuration Release

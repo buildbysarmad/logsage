@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="LogLens.Api/LogLens.Api.csproj" />
+  <Project Path="LogLens.Core.Tests/LogLens.Core.Tests.csproj" />
+  <Project Path="LogLens.Core/LogLens.Core.csproj" />
+</Solution>
