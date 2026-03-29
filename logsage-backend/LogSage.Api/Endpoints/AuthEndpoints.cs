@@ -56,8 +56,15 @@ public static class AuthEndpoints
         var token = await db.RefreshTokens.Include(r => r.User)
             .FirstOrDefaultAsync(r => r.Token == req.RefreshToken, ct);
         if (token == null || !token.IsActive) return Results.Unauthorized();
-        token.RevokedAt = DateTime.UtcNow;
-        await db.SaveChangesAsync(ct);
+
+        // Atomic revocation to prevent concurrent use
+        var revoked = await db.RefreshTokens
+            .Where(r => r.Id == token.Id && r.RevokedAt == null)
+            .ExecuteUpdateAsync(r => r.SetProperty(x => x.RevokedAt, DateTime.UtcNow), ct);
+
+        if (revoked == 0)
+            return Results.Unauthorized(); // Already revoked by concurrent request
+
         return Results.Ok(await GenerateTokensAsync(token.User, db, config, ct));
     }
 

@@ -29,7 +29,7 @@ public class AiAnalysisService(
         try
         {
             var client = http.CreateClient();
-            client.DefaultRequestHeaders.Add("x-api-key", config["Claude:ApiKey"]);
+            client.DefaultRequestHeaders.Add("x-api-key", config["Anthropic:ApiKey"]);
             client.DefaultRequestHeaders.Add("anthropic-version", "2023-06-01");
 
             var samples = group.Entries.Take(3).Select(e => e.RawLine);

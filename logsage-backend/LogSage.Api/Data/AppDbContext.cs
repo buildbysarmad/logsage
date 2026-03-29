@@ -10,6 +10,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Session> Sessions => Set<Session>();
     public DbSet<ErrorGroupEntity> ErrorGroups => Set<ErrorGroupEntity>();
     public DbSet<UsageTracking> UsageTracking => Set<UsageTracking>();
+    public DbSet<Subscription> Subscriptions => Set<Subscription>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -43,6 +44,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         b.Entity<UsageTracking>(e => {
             e.HasKey(u => u.Id);
             e.HasIndex(u => new { u.Identifier, u.Date }).IsUnique();
+        });
+        b.Entity<Subscription>(e => {
+            e.HasKey(s => s.Id);
+            e.HasIndex(s => s.ExternalSubscriptionId);
+            e.HasIndex(s => new { s.UserId, s.Provider });
+            e.HasOne(s => s.User)
+             .WithMany()
+             .HasForeignKey(s => s.UserId)
+             .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
