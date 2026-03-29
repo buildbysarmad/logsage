@@ -51,7 +51,7 @@ public class AiAnalysisServiceTests
                 Content = new StringContent("{\"error\": \"Invalid API key\"}")
             });
 
-        var httpClient = new HttpClient(httpMessageHandler.Object);
+        using var httpClient = new HttpClient(httpMessageHandler.Object);
         var httpFactory = new Mock<IHttpClientFactory>();
         httpFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
