@@ -45,7 +45,7 @@ public class AiAnalysisServiceTests
                 "SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
                 ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage
+            .ReturnsAsync(() => new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.Unauthorized,
                 Content = new StringContent("{\"error\": \"Invalid API key\"}")
