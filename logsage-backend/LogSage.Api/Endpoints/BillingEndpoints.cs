@@ -6,36 +6,43 @@ public static class BillingEndpoints
 {
     public static void MapBillingEndpoints(this WebApplication app)
     {
-        app.MapPost("/api/billing/checkout", CreateCheckout).WithTags("Billing").WithSummary("Create Paddle checkout session").RequireAuthorization();
-        app.MapPost("/api/billing/webhook", HandleWebhook).WithTags("Billing").WithSummary("Paddle webhook events handler");
-        app.MapGet("/api/billing/portal", GetPortal).WithTags("Billing").WithSummary("Get Paddle billing portal URL").RequireAuthorization();
+        app.MapPost("/api/billing/checkout", CreateCheckout).WithTags("Billing").WithSummary("Create payment checkout session").RequireAuthorization();
+        app.MapPost("/api/billing/webhook", HandleWebhook).WithTags("Billing").WithSummary("Payment webhook events handler");
+        app.MapGet("/api/billing/portal", GetPortal).WithTags("Billing").WithSummary("Get billing portal URL").RequireAuthorization();
     }
 
     private static async Task<IResult> CreateCheckout(
-        CheckoutRequest req, StripeService stripe,
-        HttpContext ctx, IConfiguration config)
+        CheckoutRequest req, BillingService billing,
+        HttpContext ctx, IConfiguration config, CancellationToken ct)
     {
-        var url = await stripe.CreateCheckoutSessionAsync(
-            ctx.User.FindFirst("sub")?.Value!,
-            req.PriceId,
-            config["App:BaseUrl"] + "/billing/success",
-            config["App:BaseUrl"] + "/billing/cancel");
-        return Results.Ok(new { checkoutUrl = url });
+        var userId = ctx.User.FindFirst("sub")?.Value!;
+        var successUrl = config["App:BaseUrl"] + "/billing/success";
+        var cancelUrl = config["App:BaseUrl"] + "/billing/cancel";
+
+        var checkoutUrl = await billing.CreateCheckoutAsync(
+            userId, req.PriceId, successUrl, cancelUrl, ct);
+
+        return Results.Ok(new { checkoutUrl });
     }
 
     private static async Task<IResult> HandleWebhook(
-        HttpRequest request, StripeService stripe)
+        HttpRequest request, BillingService billing, CancellationToken ct)
     {
-        using (var reader = new StreamReader(request.Body, leaveOpen: true))
-        {
-            var json = await reader.ReadToEndAsync();
-            await stripe.HandleWebhookAsync(json, request.Headers["Stripe-Signature"].ToString());
-        }
+        using var reader = new StreamReader(request.Body, leaveOpen: true);
+        var rawBody = await reader.ReadToEndAsync(ct);
+        var signature = request.Headers["Paddle-Signature"].ToString();
+
+        await billing.HandleWebhookAsync(rawBody, signature, ct);
         return Results.Ok();
     }
 
-    private static IResult GetPortal() =>
-        Results.Ok(new { message = "Billing portal coming soon" });
+    private static async Task<IResult> GetPortal(
+        HttpContext ctx, BillingService billing, CancellationToken ct)
+    {
+        var userId = ctx.User.FindFirst("sub")?.Value!;
+        var portalUrl = await billing.GetPortalUrlAsync(userId, ct);
+        return Results.Ok(new { portalUrl });
+    }
 }
 
 public record CheckoutRequest(string PriceId);

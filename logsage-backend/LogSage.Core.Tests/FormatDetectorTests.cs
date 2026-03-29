@@ -41,4 +41,43 @@ public class FormatDetectorTests
         var log = "Application encountered an ERROR condition\nSystem WARN: low disk space detected";
         Assert.Equal("Plain", _detector.DetectFormatName(log));
     }
+
+    [Fact]
+    public void FormatDetector_DetectsSerilog_WhenSerilogPatternPresent()
+    {
+        // Arrange
+        var serilogLog = "2024-03-14 02:14:33.123 +05:00 [INF] Starting application\n2024-03-14 02:14:34.456 +05:00 [ERR] Database connection failed";
+
+        // Act
+        var parser = _detector.Detect(serilogLog);
+
+        // Assert
+        Assert.Equal("Serilog", parser.FormatName);
+    }
+
+    [Fact]
+    public void FormatDetector_DetectsNLog_WhenNLogPatternPresent()
+    {
+        // Arrange
+        var nlogLog = "2024-03-14 12:34:56.1234|INFO|MyNamespace|Starting\n2024-03-14 12:34:57.5678|ERROR|MyNamespace|Failed";
+
+        // Act
+        var parser = _detector.Detect(nlogLog);
+
+        // Assert
+        Assert.Equal("NLog", parser.FormatName);
+    }
+
+    [Fact]
+    public void FormatDetector_FallsBackToPlainText_WhenNoPatternMatches()
+    {
+        // Arrange
+        var unstructuredLog = "Some random text\nNo recognizable pattern here\nJust plain text";
+
+        // Act
+        var parser = _detector.Detect(unstructuredLog);
+
+        // Assert
+        Assert.Equal("Plain", parser.FormatName);
+    }
 }
