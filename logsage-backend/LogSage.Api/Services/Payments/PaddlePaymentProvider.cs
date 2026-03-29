@@ -37,7 +37,7 @@ public class PaddlePaymentProvider(
             cancel_url = request.CancelUrl
         };
 
-        var httpRequest = new HttpRequestMessage(HttpMethod.Post, "https://api.paddle.com/transactions")
+        using var httpRequest = new HttpRequestMessage(HttpMethod.Post, "https://api.paddle.com/transactions")
         {
             Headers = { { "Authorization", $"Bearer {apiKey}" } },
             Content = JsonContent.Create(payload)
