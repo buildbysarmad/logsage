@@ -7,50 +7,12 @@ on:
     branches: [main, develop]
 
 jobs:
-  build-and-test-backend:
-    name: Backend — Build & Test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup .NET 9
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '9.0.x'
-
-      - name: Add GitHub Packages source
-        run: dotnet nuget add source
-               "https://nuget.pkg.github.com/buildbysarmad/index.json"
-               --name github-buildbysarmad
-               --username buildbysarmad
-               --password ${{ secrets.GITHUB_TOKEN }}
-               --store-password-in-clear-text
-
-      - name: Restore
-        run: dotnet restore logsage-backend/LogSage.Core/LogSage.Core.csproj
-
-      - name: Build
-        run: dotnet build logsage-backend/LogSage.Core/LogSage.Core.csproj --no-restore --configuration Release
-
-      - name: Test
-        run: |
-          dotnet test logsage-backend/LogSage.Core.Tests/LogSage.Core.Tests.csproj \
-            --configuration Release \
-            --collect:"XPlat Code Coverage" \
-            --results-directory ./coverage \
-            --logger "trx;LogFileName=test-results.trx"
-
-      - name: Upload coverage
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage
-          path: ./coverage
-
   build-and-test-api:
     name: API — Build & Test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     steps:
       - uses: actions/checkout@v4
 
@@ -59,16 +21,19 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
-      - name: Add GitHub Packages source
-        run: dotnet nuget add source
-               "https://nuget.pkg.github.com/buildbysarmad/index.json"
-               --name github-buildbysarmad
-               --username buildbysarmad
-               --password ${{ secrets.GITHUB_TOKEN }}
-               --store-password-in-clear-text
+      - name: Authenticate to GitHub Packages
+        run: |
+          dotnet nuget add source "https://nuget.pkg.github.com/buildbysarmad/index.json" \
+            --name github-buildbysarmad \
+            --username buildbysarmad \
+            --password ${{ secrets.GITHUB_TOKEN }} \
+            --store-password-in-clear-text
 
       - name: Restore
         run: dotnet restore logsage-backend/LogSage.Api/LogSage.Api.csproj
 
       - name: Build
         run: dotnet build logsage-backend/LogSage.Api/LogSage.Api.csproj --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test logsage-backend/LogSage.Api.Tests/LogSage.Api.Tests.csproj --configuration Release --no-build --verbosity normal
