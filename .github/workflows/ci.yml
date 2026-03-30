@@ -14,15 +14,23 @@ jobs:
       contents: read
       packages: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.2
 
       - name: Setup .NET 9
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v4.3.1
         with:
           dotnet-version: '9.0.x'
-          source-url: https://nuget.pkg.github.com/buildbysarmad/index.json
+
+      - name: Add GitHub Packages NuGet source
+        run: |
+          dotnet nuget add source \
+            "https://nuget.pkg.github.com/buildbysarmad/index.json" \
+            --name github-buildbysarmad \
+            --username buildbysarmad \
+            --password ${{ secrets.GITHUB_TOKEN }} \
+            --store-password-in-clear-text
         env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Restore
         run: dotnet restore logsage-backend/LogSage.Api/LogSage.Api.csproj
