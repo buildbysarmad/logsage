@@ -26,8 +26,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="LogSage.Core" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\LogSage.Api\LogSage.Api.csproj" />
-    <ProjectReference Include="..\LogSage.Core\LogSage.Core.csproj" />
   </ItemGroup>
 
 </Project>
