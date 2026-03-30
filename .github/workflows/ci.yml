@@ -27,10 +27,8 @@ jobs:
             "https://nuget.pkg.github.com/buildbysarmad/index.json" \
             --name github-buildbysarmad \
             --username buildbysarmad \
-            --password ${{ secrets.GITHUB_TOKEN }} \
+            --password ${{ secrets.NUGET_READ_TOKEN }} \
             --store-password-in-clear-text
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Restore
         run: dotnet restore logsage-backend/LogSage.Api/LogSage.Api.csproj
