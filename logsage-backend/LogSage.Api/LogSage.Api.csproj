@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
-<!-- Comment out the package reference -->
-<!-- <PackageReference Include="LogSage.Core" Version="1.0.0" /> -->
-<!-- Use project reference for local debugging -->
-    <ProjectReference Include="..\..\..\LogSage-Core\LogSage.Core\LogSage.Core.csproj" />
+    <!-- Comment out the package reference -->
+     <PackageReference Include="LogSage.Core" Version="1.0.0" /> 
+    <!-- Use project reference for local debugging -->
+    <!--<ProjectReference Include="..\..\..\LogSage-Core\LogSage.Core\LogSage.Core.csproj" />-->
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
