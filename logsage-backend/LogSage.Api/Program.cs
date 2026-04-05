@@ -22,6 +22,12 @@ Log.Logger = new LoggerConfiguration()
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure Kestrel — enforce 2MB max request body size
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 2 * 1024 * 1024; // 2MB
+});
+
 // Configure Serilog
 builder.Host.UseSerilog((ctx, services, lc) => lc
     .ReadFrom.Configuration(ctx.Configuration)
@@ -152,23 +158,17 @@ if (app.Environment.IsDevelopment())
             PreferredSecurityScheme = "Bearer"
         };
     });
-
-    app.MapPost("/api/dev/make-pro", async (
-        string email, AppDbContext db, CancellationToken ct) =>
-    {
-        var user = await db.Users.FirstOrDefaultAsync(
-            u => u.Email == email, ct);
-        if (user == null) return Results.NotFound();
-        user.Plan = "pro";
-        await db.SaveChangesAsync(ct);
-        return Results.Ok(new { message = $"{email} is now pro" });
-    });
 }
 
 app.MapHealthChecks("/health");
 app.MapAnalyzeEndpoints();
 app.MapAuthEndpoints();
-app.MapBillingEndpoints();
+
+// Only register billing endpoints when pricing is enabled
+if (app.Configuration.GetValue<bool>("PRICING_ENABLED"))
+{
+    app.MapBillingEndpoints();
+}
 
 if (app.Environment.IsDevelopment())
 {

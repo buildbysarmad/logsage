@@ -18,6 +18,11 @@ interface Props {
 export default function AiAnalysisPanel({ analysis, group }: Props) {
   const [copied, setCopied] = useState(false);
 
+  // Hide AI panel when AI feature is disabled
+  if (process.env.NEXT_PUBLIC_AI_ENABLED !== 'true') {
+    return null;
+  }
+
   const copyFix = async () => {
     if (!analysis?.suggestedFix) return;
     await navigator.clipboard.writeText(analysis.suggestedFix);
