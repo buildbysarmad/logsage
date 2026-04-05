@@ -1,18 +1,28 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/auth';
+import { getTokenExpiry } from '@/lib/jwt';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const setUser = useAuthStore((s) => s.setUser);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sessionExpired, setSessionExpired] = useState(false);
+
+  useEffect(() => {
+    if (searchParams?.get('reason') === 'expired') {
+      setSessionExpired(true);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,11 +32,34 @@ export default function LoginPage() {
       const { data: tokens } = await authApi.login(email, password);
       localStorage.setItem('access_token', tokens.accessToken);
       localStorage.setItem('refresh_token', tokens.refreshToken);
+
+      // Parse token expiry
+      const tokenExpiry = getTokenExpiry(tokens.accessToken);
+
       const { data: user } = await authApi.me();
-      setUser(user);
+      setUser(user, tokenExpiry);
       router.push('/analyze');
-    } catch {
-      setError('Invalid email or password');
+    } catch (err: any) {
+      // Check if it's an HTTP error response
+      if (err?.response) {
+        const status = err.response.status;
+
+        if (status === 401) {
+          setError('Incorrect email or password.');
+        } else if (status === 429) {
+          setError('Too many attempts. Please wait a moment and try again.');
+        } else if (status === 500) {
+          setError('Server error. Please try again in a moment.');
+        } else {
+          setError('Something went wrong. Please try again.');
+        }
+      } else if (err?.request) {
+        // Network error - request was made but no response received
+        setError('Could not connect. Please check your connection and try again.');
+      } else {
+        // Something else went wrong
+        setError('Something went wrong. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -37,10 +70,19 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-semibold text-white">
-            log<span className="text-emerald-400">lens</span>
+            Log<span className="text-emerald-400">Sage</span>
           </h1>
           <p className="text-gray-400 text-sm mt-2">Sign in to your account</p>
         </div>
+
+        {sessionExpired && (
+          <div className="bg-yellow-900/20 border border-yellow-700/50 rounded-lg px-4 py-3 mb-4">
+            <p className="text-yellow-400 text-sm">
+              Your session expired. Please sign in again.
+            </p>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm text-gray-400 mb-1.5">Email</label>

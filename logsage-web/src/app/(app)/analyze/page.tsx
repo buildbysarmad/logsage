@@ -17,6 +17,13 @@ export default function AnalyzePage() {
   const [paste, setPaste] = useState('');
 
   const analyze = async (rawLog: string) => {
+    // Validate line count before submission
+    const lineCount = rawLog.split('\n').length;
+    if (lineCount > 5000) {
+      setError(`Your log has ${lineCount.toLocaleString()} lines. The limit is 5,000.`);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
@@ -33,6 +40,14 @@ export default function AnalyzePage() {
 
   const onDrop = useCallback(async (files: File[]) => {
     if (!files[0]) return;
+
+    // Validate file size before upload
+    const fileSizeMB = files[0].size / (1024 * 1024);
+    if (files[0].size > 2 * 1024 * 1024) {
+      setError(`File is too large (${fileSizeMB.toFixed(1)}MB). Maximum size is 2MB.`);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
@@ -60,10 +75,7 @@ export default function AnalyzePage() {
 
   if (!result) {
     return (
-      <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-8">
-        <h1 className="text-3xl font-semibold text-white mb-2">
-          log<span className="text-emerald-400">lens</span>
-        </h1>
+      <div className="min-h-[calc(100vh-49px)] bg-gray-950 flex flex-col items-center justify-center p-8">
         <p className="text-gray-400 mb-8 text-sm">
           Paste your logs. Know what broke. In 10 seconds.
         </p>
@@ -127,19 +139,16 @@ export default function AnalyzePage() {
         {error && <p className="mt-4 text-red-400 text-sm">{error}</p>}
 
         <p className="mt-8 text-xs text-gray-600">
-          Free tier: 3 analyses/day · 500 lines max · No account needed
+          Free during early access · 5,000 lines · 2MB max · No account needed · No judgement on your logs 🙈
         </p>
       </div>
     );
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-950 text-gray-200 overflow-hidden">
-      {/* Top bar */}
+    <div className="h-[calc(100vh-49px)] flex flex-col bg-gray-950 text-gray-200 overflow-hidden">
+      {/* Stats bar */}
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-800 bg-gray-900 shrink-0">
-        <span className="font-semibold text-white text-sm">
-          log<span className="text-emerald-400">lens</span>
-        </span>
         <div className="flex items-center gap-3 text-xs text-gray-400">
           <span className="bg-gray-800 px-2 py-0.5 rounded">{result.detectedFormat}</span>
           <span>{result.totalLines.toLocaleString()} lines</span>
@@ -148,13 +157,13 @@ export default function AnalyzePage() {
           {result.wasTruncated && (
             <span className="text-orange-400">truncated to 500 lines</span>
           )}
+          <button
+            onClick={() => { setResult(null); setSelected(null); }}
+            className="text-xs text-gray-500 hover:text-white transition-colors ml-auto"
+          >
+            New analysis
+          </button>
         </div>
-        <button
-          onClick={() => { setResult(null); setSelected(null); }}
-          className="text-xs text-gray-500 hover:text-white transition-colors"
-        >
-          New analysis
-        </button>
       </div>
 
       {/* 3-panel layout */}
@@ -165,7 +174,7 @@ export default function AnalyzePage() {
           onSelect={setSelected}
         />
         <LogDetailPanel group={selected} />
-        <AiAnalysisPanel analysis={aiForSelected ?? null} group={selected} />
+        {false && <AiAnalysisPanel analysis={aiForSelected ?? null} group={selected} />}
       </div>
     </div>
   );

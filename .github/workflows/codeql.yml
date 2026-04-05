@@ -21,15 +21,23 @@ jobs:
       matrix:
         language: [csharp]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.2
       - uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
           queries: security-extended,security-and-quality
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v4.3.1
         with:
           dotnet-version: '9.0.x'
+      - name: Add GitHub Packages NuGet source
+        run: |
+          dotnet nuget add source \
+            "https://nuget.pkg.github.com/buildbysarmad/index.json" \
+            --name github-buildbysarmad \
+            --username buildbysarmad \
+            --password ${{ secrets.NUGET_READ_TOKEN }} \
+            --store-password-in-clear-text
       - name: Build
         run: dotnet build --configuration Release
         working-directory: logsage-backend

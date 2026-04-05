@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/auth';
+import { getTokenExpiry } from '@/lib/jwt';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -23,11 +24,39 @@ export default function RegisterPage() {
       const { data: tokens } = await authApi.register(email, password);
       localStorage.setItem('access_token', tokens.accessToken);
       localStorage.setItem('refresh_token', tokens.refreshToken);
+
+      // Parse token expiry
+      const tokenExpiry = getTokenExpiry(tokens.accessToken);
+
       const { data: user } = await authApi.me();
-      setUser(user);
+      setUser(user, tokenExpiry);
       router.push('/analyze');
-    } catch {
-      setError('Could not create account. Email may already be registered.');
+    } catch (err: any) {
+      // Check if it's an HTTP error response
+      if (err?.response) {
+        const status = err.response.status;
+        const data = err.response.data;
+
+        if (status === 400) {
+          // Try to extract message from response body
+          const message = data?.message || data?.error || 'Please check your details and try again.';
+          setError(message);
+        } else if (status === 409) {
+          setError('An account with this email already exists. Try logging in instead.');
+        } else if (status === 429) {
+          setError('Too many attempts. Please wait a moment and try again.');
+        } else if (status === 500) {
+          setError('Server error. Please try again in a moment.');
+        } else {
+          setError('Something went wrong. Please try again.');
+        }
+      } else if (err?.request) {
+        // Network error - request was made but no response received
+        setError('Could not connect. Please check your connection and try again.');
+      } else {
+        // Something else went wrong
+        setError('Something went wrong. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -38,7 +67,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-semibold text-white">
-            log<span className="text-emerald-400">lens</span>
+            Log<span className="text-emerald-400">Sage</span>
           </h1>
           <p className="text-gray-400 text-sm mt-2">Create a free account</p>
         </div>
@@ -54,7 +83,9 @@ export default function RegisterPage() {
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
               className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2.5
                          text-white text-sm focus:outline-none focus:border-emerald-500" />
-            <p className="text-xs text-gray-600 mt-1">Minimum 8 characters</p>
+            <p className="text-xs text-gray-500 mt-1.5">
+              At least 8 characters · one uppercase · one number · one special character (!@#$...)
+            </p>
           </div>
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <button type="submit" disabled={loading}

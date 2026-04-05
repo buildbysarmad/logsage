@@ -33,9 +33,14 @@ const createApiClient = (): AxiosInstance => {
           original.headers.Authorization = `Bearer ${data.accessToken}`;
           return instance(original);
         } catch {
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
-          if (typeof window !== 'undefined') window.location.href = '/login';
+          // Import clearUser dynamically to avoid circular dependency
+          const { useAuthStore } = await import('./auth');
+          const { clearUser } = useAuthStore.getState();
+          clearUser();
+
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login?reason=expired';
+          }
         }
       }
       return Promise.reject(err);
@@ -78,6 +83,9 @@ export const authApi = {
   },
 
   me: () => api.get<User>('/api/auth/me'),
+
+  changePassword: (currentPassword: string, newPassword: string) =>
+    api.post('/api/auth/change-password', { currentPassword, newPassword }),
 };
 
 export const billingApi = {
