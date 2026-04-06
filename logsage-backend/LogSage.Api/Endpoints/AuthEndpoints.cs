@@ -23,7 +23,7 @@ public static class AuthEndpoints
         app.MapPost("/api/auth/change-password", ChangePassword).WithTags("Auth").WithSummary("Change user password").RequireAuthorization();
     }
 
-    private static async Task<IResult> Register(
+    internal static async Task<IResult> Register(
         RegisterRequest req, AppDbContext db,
         IConfiguration config, CancellationToken ct)
     {
@@ -39,7 +39,7 @@ public static class AuthEndpoints
         return Results.Ok(await GenerateTokensAsync(user, db, config, ct));
     }
 
-    private static async Task<IResult> Login(
+    internal static async Task<IResult> Login(
         LoginRequest req, AppDbContext db,
         IConfiguration config, CancellationToken ct)
     {
@@ -50,7 +50,7 @@ public static class AuthEndpoints
         return Results.Ok(await GenerateTokensAsync(user, db, config, ct));
     }
 
-    private static async Task<IResult> Refresh(
+    internal static async Task<IResult> Refresh(
         RefreshRequest req, AppDbContext db,
         IConfiguration config, CancellationToken ct)
     {
@@ -69,7 +69,7 @@ public static class AuthEndpoints
         return Results.Ok(await GenerateTokensAsync(token.User, db, config, ct));
     }
 
-    private static async Task<IResult> Logout(
+    internal static async Task<IResult> Logout(
         RefreshRequest req, AppDbContext db, CancellationToken ct)
     {
         var token = await db.RefreshTokens
@@ -78,7 +78,7 @@ public static class AuthEndpoints
         return Results.Ok();
     }
 
-    private static IResult Me(HttpContext ctx)
+    internal static IResult Me(HttpContext ctx)
     {
         var userIdStr = ctx.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
                      ?? ctx.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
@@ -96,7 +96,7 @@ public static class AuthEndpoints
         return Results.Ok(new UserResponse(userId, email, plan));
     }
 
-    private static async Task<IResult> ChangePassword(
+    internal static async Task<IResult> ChangePassword(
         ChangePasswordRequest req, HttpContext ctx,
         AppDbContext db, CancellationToken ct)
     {

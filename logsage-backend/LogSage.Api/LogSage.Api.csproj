@@ -29,4 +29,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="LogSage.Api.Tests" />
+  </ItemGroup>
+
 </Project>

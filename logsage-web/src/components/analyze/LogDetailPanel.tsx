@@ -1,4 +1,8 @@
+'use client';
+
+import { motion } from 'framer-motion';
 import type { ErrorGroup } from '@/lib/types';
+import { useReducedMotion, motionTransitions } from '@/lib/motion';
 
 const lineClass: Record<string, string> = {
   Fatal: 'border-red-500 bg-red-950 text-red-200',
@@ -14,17 +18,35 @@ interface Props {
 }
 
 export default function LogDetailPanel({ group }: Props) {
+  const shouldReduceMotion = useReducedMotion();
+
   if (!group) {
     return (
-      <div className="flex-1 bg-gray-900 flex items-center justify-center border-r border-gray-800">
+      <motion.div
+        className="flex-1 bg-gray-900 flex items-center justify-center border-r border-gray-800"
+        initial={shouldReduceMotion ? undefined : { opacity: 0, y: 20 }}
+        animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, ...motionTransitions.smooth }}
+      >
         <p className="text-sm text-gray-600">Select an error group to view log lines</p>
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden border-r border-gray-800 bg-gray-950">
-      <div className="px-4 py-3 border-b border-gray-800 bg-gray-900 shrink-0">
+    <motion.div
+      className="flex-1 flex flex-col overflow-hidden border-r border-gray-800 bg-gray-950"
+      initial={shouldReduceMotion ? undefined : { opacity: 0, y: 20 }}
+      animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+      transition={{ delay: 0.3, ...motionTransitions.smooth }}
+      key={group.groupKey}
+    >
+      <motion.div
+        className="px-4 py-3 border-b border-gray-800 bg-gray-900 shrink-0"
+        initial={shouldReduceMotion ? undefined : { opacity: 0, y: -10 }}
+        animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+        transition={{ delay: 0.4, ...motionTransitions.smooth }}
+      >
         <p className="text-sm font-medium text-white">
           {group.exceptionType ?? group.representativeMessage}
         </p>
@@ -34,14 +56,18 @@ export default function LogDetailPanel({ group }: Props) {
           {group.lastSeen && <span>Last: {group.lastSeen.slice(11, 19)}</span>}
           {group.source && <span>{group.source}</span>}
         </div>
-      </div>
-      <div className="flex-1 overflow-y-auto p-4 space-y-1.5">
+      </motion.div>
+
+      <div className="flex-1 overflow-y-auto p-4 space-y-1.5 scrollbar-thin min-h-0">
         {group.entries.map((entry, i) => (
-          <div
+          <motion.div
             key={i}
             className={`font-mono text-xs p-2.5 rounded border-l-2 leading-relaxed ${
               lineClass[entry.level] ?? 'border-gray-600 bg-gray-900 text-gray-400'
             }`}
+            initial={shouldReduceMotion ? undefined : { opacity: 0, x: -10 }}
+            animate={shouldReduceMotion ? undefined : { opacity: 1, x: 0 }}
+            transition={{ delay: 0.5 + i * 0.02, ...motionTransitions.smooth }}
           >
             {entry.timestamp && (
               <span className="opacity-60 mr-2">{entry.timestamp.slice(11, 19)}</span>
@@ -49,13 +75,13 @@ export default function LogDetailPanel({ group }: Props) {
             <span className="font-semibold mr-2">{entry.level.toUpperCase()}</span>
             <span>{entry.message}</span>
             {entry.stackTrace && (
-              <pre className="mt-1.5 text-xs opacity-60 whitespace-pre-wrap overflow-x-auto">
+              <pre className="mt-1.5 text-xs opacity-60 whitespace-pre-wrap overflow-x-auto scrollbar-thin">
                 {entry.stackTrace}
               </pre>
             )}
-          </div>
+          </motion.div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }

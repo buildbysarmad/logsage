@@ -3,15 +3,19 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { authApi, analyzeApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/auth';
 import type { SessionSummary } from '@/lib/types';
 import { ProfileCard } from '@/components/dashboard/ProfileCard';
 import { StatsCard } from '@/components/dashboard/StatsCard';
 import { SessionHistoryTable } from '@/components/dashboard/SessionHistoryTable';
+import { AnimatedBackground } from '@/components/motion/AnimatedBackground';
+import { useReducedMotion, motionTransitions } from '@/lib/motion';
 
 export default function DashboardPage() {
   const router = useRouter();
+  const shouldReduceMotion = useReducedMotion();
 
   // Use Zustand's persisted state
   const user = useAuthStore((s) => s.user);
@@ -54,7 +58,10 @@ export default function DashboardPage() {
       .then(([, sessionsRes]) => {
         setSessions(sessionsRes.data);
       })
-      .catch(() => {
+      .catch((err) => {
+        // If it's a 401 error, the interceptor will handle redirect
+        // Just show error state
+        console.error('[Dashboard] Failed to load data:', err);
         setError('Failed to load dashboard data');
       })
       .finally(() => setLoading(false));
@@ -62,32 +69,62 @@ export default function DashboardPage() {
 
   if (isStoreLoading || loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <p className="text-gray-500">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center relative">
+        <AnimatedBackground />
+        <motion.div
+          className="relative z-10"
+          initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.9 }}
+          animate={shouldReduceMotion ? false : { opacity: 1, scale: 1 }}
+          transition={motionTransitions.springy}
+        >
+          <motion.div
+            className="w-16 h-16 border-4 border-emerald-400 border-t-transparent rounded-full"
+            animate={shouldReduceMotion ? {} : { rotate: 360 }}
+            transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+          />
+          <p className="text-gray-500 mt-4 text-center">Loading...</p>
+        </motion.div>
       </div>
     );
   }
 
   if (error || !user) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <p className="text-red-400">{error || 'Failed to load user data'}</p>
+      <div className="min-h-screen flex items-center justify-center relative">
+        <AnimatedBackground />
+        <motion.p
+          className="text-red-400 relative z-10"
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+          animate={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+          transition={motionTransitions.smooth}
+        >
+          {error || 'Failed to load user data'}
+        </motion.p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950">
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="flex items-center justify-between mb-8">
+    <div className="min-h-screen relative">
+      <AnimatedBackground />
+
+      <div className="max-w-7xl mx-auto p-6 relative z-10">
+        <motion.div
+          className="flex items-center justify-between mb-8"
+          initial={shouldReduceMotion ? false : { opacity: 0, y: -20 }}
+          animate={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+          transition={motionTransitions.smooth}
+        >
           <h1 className="text-2xl font-semibold text-white">Dashboard</h1>
-          <Link
-            href="/analyze"
-            className="text-sm bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg transition-colors"
-          >
-            New analysis
-          </Link>
-        </div>
+          <motion.div whileHover={shouldReduceMotion ? {} : { scale: 1.05 }} whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}>
+            <Link
+              href="/analyze"
+              className="text-sm bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              New analysis
+            </Link>
+          </motion.div>
+        </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           <div className="lg:col-span-1">

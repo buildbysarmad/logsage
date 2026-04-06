@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { PageTransition } from '@/components/motion/PageTransition';
 
 export const metadata: Metadata = {
   title: 'LogSage — AI Log Analysis',
@@ -23,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className="antialiased">
-        {children}
+        <PageTransition>{children}</PageTransition>
       </body>
     </html>
   );

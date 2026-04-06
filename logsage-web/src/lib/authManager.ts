@@ -1,28 +1,7 @@
 import { useAuthStore } from './auth';
 import { authApi } from './api';
 
-let expiryCheckInterval: NodeJS.Timeout | null = null;
 let visibilityListener: (() => void) | null = null;
-
-/**
- * Proactive session expiry check
- * Runs every 60 seconds to check if the token has expired
- */
-function startExpiryCheck() {
-  if (expiryCheckInterval) return;
-
-  expiryCheckInterval = setInterval(() => {
-    const { isSessionExpired, clearUser } = useAuthStore.getState();
-
-    if (isSessionExpired()) {
-      console.log('[AuthManager] Session expired (proactive check)');
-      clearUser();
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login?reason=expired';
-      }
-    }
-  }, 60000); // Check every 60 seconds
-}
 
 /**
  * Visibility check - validates session when user returns to tab
@@ -40,8 +19,10 @@ function startVisibilityCheck() {
 
       try {
         await authApi.me();
-      } catch (error: any) {
-        if (error?.response?.status === 401) {
+      } catch (error: unknown) {
+        // Import axios for type checking
+        const axios = await import('axios');
+        if (axios.default.isAxiosError(error) && error.response?.status === 401) {
           console.log('[AuthManager] Session expired (visibility check)');
           clearUser();
           if (typeof window !== 'undefined') {
@@ -76,11 +57,6 @@ export function startAuthManager() {
  */
 export function stopAuthManager() {
   console.log('[AuthManager] Stopping auth lifecycle monitoring');
-
-  if (expiryCheckInterval) {
-    clearInterval(expiryCheckInterval);
-    expiryCheckInterval = null;
-  }
 
   if (visibilityListener && typeof document !== 'undefined') {
     document.removeEventListener('visibilitychange', visibilityListener);
