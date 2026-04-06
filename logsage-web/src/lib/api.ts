@@ -24,23 +24,41 @@ const createApiClient = (): AxiosInstance => {
         try {
           const refresh = localStorage.getItem('refresh_token');
           if (!refresh) throw new Error('No refresh token');
+
           const { data } = await axios.post<AuthTokens>(
             `${process.env.NEXT_PUBLIC_API_URL}/api/auth/refresh`,
             { refreshToken: refresh }
           );
+
           localStorage.setItem('access_token', data.accessToken);
           localStorage.setItem('refresh_token', data.refreshToken);
           original.headers.Authorization = `Bearer ${data.accessToken}`;
           return instance(original);
-        } catch {
-          // Import clearUser dynamically to avoid circular dependency
-          const { useAuthStore } = await import('./auth');
-          const { clearUser } = useAuthStore.getState();
-          clearUser();
+        } catch (refreshError) {
+          // Refresh failed - clear everything and redirect
+          console.log('[API] Token refresh failed, clearing auth state');
 
+          // Clear localStorage first
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+          }
+
+          // Clear zustand store
+          try {
+            const { useAuthStore } = await import('./auth');
+            const { logout } = useAuthStore.getState();
+            logout();
+          } catch (e) {
+            console.error('[API] Failed to clear auth store:', e);
+          }
+
+          // Redirect to login
           if (typeof window !== 'undefined') {
             window.location.href = '/login?reason=expired';
           }
+
+          return Promise.reject(refreshError);
         }
       }
       return Promise.reject(err);

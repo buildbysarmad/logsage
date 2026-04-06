@@ -13,12 +13,13 @@ public static class AnalyzeEndpoints
     {
         app.MapPost("/api/analyze", AnalyzeText)
            .WithTags("Analyze")
-           .WithSummary("Analyze log text — free tier, no auth required")
-           .WithDescription("Free: 3/day, 500 lines max. Pro: unlimited with AI root cause analysis.");
+           .WithSummary("Analyze log text — no auth required")
+           .WithDescription("5,000 line limit. AI analysis available for Pro users when AI_ENABLED is true.");
 
         app.MapPost("/api/analyze/upload", AnalyzeFile)
            .WithTags("Analyze")
-           .WithSummary("Analyze log file upload — free tier, no auth required")
+           .WithSummary("Analyze log file upload — no auth required")
+           .WithDescription("2MB file size limit, 5,000 line limit. AI analysis available for Pro users when AI_ENABLED is true.")
            .DisableAntiforgery();
 
         app.MapGet("/api/sessions", GetSessions)
@@ -45,17 +46,20 @@ public static class AnalyzeEndpoints
         var isPro = ctx.User.HasClaim("plan", "pro") ||
                     ctx.User.HasClaim("plan", "team");
 
-        if (!isPro && !await sessions.IsWithinFreeTierLimitAsync(identifier, ct))
+        // Only enforce free tier limits when pricing is enabled
+        var pricingEnabled = config.GetValue<bool>("PRICING_ENABLED");
+        if (pricingEnabled && !isPro && !await sessions.IsWithinFreeTierLimitAsync(identifier, ct))
             return Results.StatusCode(429);
 
         var lines = req.RawLog.Split('\n');
-        var wasTruncated = !isPro && lines.Length > 500;
+
+        // Enforce 5,000 line limit for all users BEFORE parsing
+        if (lines.Length > 5000)
+            return Results.BadRequest(new { error = "Log exceeds the 5,000 line limit." });
+
+        var wasTruncated = pricingEnabled && !isPro && lines.Length > 500;
         var capped = wasTruncated ? string.Join('\n', lines.Take(500)) : req.RawLog;
         var result = engine.Analyze(capped);
-
-        // Enforce 5,000 line limit for all users
-        if (result.TotalLines > 5000)
-            return Results.BadRequest(new { error = "Log exceeds the 5,000 line limit." });
 
         List<AiGroupAnalysis> aiResults = [];
         var aiEnabled = config.GetValue<bool>("AI_ENABLED");
@@ -63,7 +67,9 @@ public static class AnalyzeEndpoints
         {
             aiResults = await ai.AnalyzeGroupsAsync(result.ErrorGroups, ct);
         }
-        await sessions.IncrementUsageAsync(identifier, ct);
+
+        if (pricingEnabled)
+            await sessions.IncrementUsageAsync(identifier, ct);
 
         return Results.Ok(new AnalysisResponse(result, aiResults, wasTruncated));
     }
@@ -81,7 +87,9 @@ public static class AnalyzeEndpoints
         var isPro = ctx.User.HasClaim("plan", "pro") ||
                     ctx.User.HasClaim("plan", "team");
 
-        if (!isPro && !await sessions.IsWithinFreeTierLimitAsync(identifier, ct))
+        // Only enforce free tier limits when pricing is enabled
+        var pricingEnabled = config.GetValue<bool>("PRICING_ENABLED");
+        if (pricingEnabled && !isPro && !await sessions.IsWithinFreeTierLimitAsync(identifier, ct))
             return Results.StatusCode(429);
 
         using var stream = file.OpenReadStream();
@@ -97,7 +105,9 @@ public static class AnalyzeEndpoints
         {
             aiResults = await ai.AnalyzeGroupsAsync(result.ErrorGroups, ct);
         }
-        await sessions.IncrementUsageAsync(identifier, ct);
+
+        if (pricingEnabled)
+            await sessions.IncrementUsageAsync(identifier, ct);
 
         return Results.Ok(new AnalysisResponse(result, aiResults, false));
     }
@@ -107,6 +117,7 @@ public static class AnalyzeEndpoints
     {
         var userId = Guid.Parse(ctx.User.FindFirst("sub")?.Value ?? Guid.Empty.ToString());
         var list = await db.Sessions
+            .AsNoTracking()
             .Where(s => s.UserId == userId)
             .OrderByDescending(s => s.CreatedAt)
             .Take(50)
@@ -122,6 +133,7 @@ public static class AnalyzeEndpoints
     {
         var userId = Guid.Parse(ctx.User.FindFirst("sub")?.Value ?? Guid.Empty.ToString());
         var session = await db.Sessions
+            .AsNoTracking()
             .Include(s => s.ErrorGroups)
             .FirstOrDefaultAsync(s => s.Id == id && s.UserId == userId, ct);
         return session == null ? Results.NotFound() : Results.Ok(session);

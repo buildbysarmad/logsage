@@ -15,7 +15,10 @@ public static class BillingEndpoints
         CheckoutRequest req, BillingService billing,
         HttpContext ctx, IConfiguration config, CancellationToken ct)
     {
-        var userId = ctx.User.FindFirst("sub")?.Value!;
+        var userId = ctx.User.FindFirst("sub")?.Value;
+        if (userId == null)
+            return Results.Unauthorized();
+
         var successUrl = config["App:BaseUrl"] + "/billing/success";
         var cancelUrl = config["App:BaseUrl"] + "/billing/cancel";
 
@@ -39,7 +42,10 @@ public static class BillingEndpoints
     private static async Task<IResult> GetPortal(
         HttpContext ctx, BillingService billing, CancellationToken ct)
     {
-        var userId = ctx.User.FindFirst("sub")?.Value!;
+        var userId = ctx.User.FindFirst("sub")?.Value;
+        if (userId == null)
+            return Results.Unauthorized();
+
         var portalUrl = await billing.GetPortalUrlAsync(userId, ct);
         return Results.Ok(new { portalUrl });
     }
