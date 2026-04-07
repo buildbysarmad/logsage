@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Pricing — LogSage',
-  description: 'Simple pricing for AI-powered log analysis. Free during early access.',
+  description: 'Simple pricing for smart log analysis. Free during early access.',
 };
 
 const pricingEnabled = process.env.NEXT_PUBLIC_PRICING_ENABLED === 'true';
@@ -43,7 +43,7 @@ export default function PricingPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {[
             { name: 'Free', price: '$0', features: ['3 analyses/day', '500 lines max', 'Error grouping', 'No account needed'], cta: 'Start free', href: '/analyze', featured: false },
-            { name: 'Pro', price: '$19/mo', features: ['Unlimited analyses', '50k lines', 'AI root cause', 'Session history'], cta: 'Get Pro', href: '/register', featured: true },
+            { name: 'Pro', price: '$19/mo', features: ['Unlimited analyses', '50k lines', 'Root cause analysis', 'Session history'], cta: 'Get Pro', href: '/register', featured: true },
             { name: 'Team', price: '$49/mo', features: ['Everything in Pro', 'API access', '5 seats', 'Priority support'], cta: 'Get Team', href: '/register', featured: false },
           ].map((plan) => (
             <div key={plan.name} className={`rounded-xl p-6 border text-left ${plan.featured ? 'border-emerald-500 bg-emerald-950' : 'border-gray-800 bg-gray-900'}`}>

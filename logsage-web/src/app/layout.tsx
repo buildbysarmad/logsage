@@ -3,14 +3,14 @@ import './globals.css';
 import { PageTransition } from '@/components/motion/PageTransition';
 
 export const metadata: Metadata = {
-  title: 'LogSage — AI Log Analysis',
+  title: 'LogSage — Instant Log Analysis',
   description:
     'Upload your logs. Get errors grouped and root causes explained in seconds. Free. No signup required.',
-  keywords: ['log analysis', 'error debugging', 'AI', '.NET', 'developer tools'],
+  keywords: ['log analysis', 'error debugging', 'log parser', '.NET', 'developer tools'],
   openGraph: {
-    title: 'LogSage — AI Log Analysis',
-    description: 'Paste your logs. Know what broke and why. In 10 seconds.',
-    url: 'https://LogSage.io',
+    title: 'LogSage — Instant Log Analysis',
+    description: 'Paste your logs. Know what broke and why. In seconds.',
+    url: 'https://logsage.dev',
     siteName: 'LogSage',
     type: 'website',
   },
