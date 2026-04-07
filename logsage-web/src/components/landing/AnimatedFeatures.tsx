@@ -20,8 +20,8 @@ const features = [
   AI_ENABLED
     ? {
         icon: '🤖',
-        title: 'AI root cause',
-        desc: 'Claude explains what caused each error and how to fix it',
+        title: 'Root cause analysis',
+        desc: 'Smart analysis explains what caused each error and how to fix it',
       }
     : {
         icon: '📜',

@@ -1,13 +1,19 @@
-name: CD — Staging
+name: CD — Staging (Disabled)
+
+# Staging environment is not configured
+# All code is deployed directly from main to production
+# This workflow is disabled and kept for reference only
 
 on:
-  push:
-    branches: [develop]
+  workflow_dispatch:
 
 jobs:
-  deploy-staging:
-    name: Deploy to staging (skipped — not configured yet)
+  staging-disabled:
+    name: Staging Disabled
     runs-on: ubuntu-latest
     steps:
-      - name: Skip — Railway not configured yet
-        run: echo "Staging deployment will be configured in Phase 6"
+      - name: Staging environment disabled
+        run: |
+          echo "⚠️  Staging environment is not configured"
+          echo "📦 Production deployments happen from main branch only"
+          echo "🔀 Merge develop → main to trigger production deployment"

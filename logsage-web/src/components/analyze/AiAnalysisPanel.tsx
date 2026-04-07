@@ -18,7 +18,7 @@ interface Props {
 export default function AiAnalysisPanel({ analysis, group }: Props) {
   const [copied, setCopied] = useState(false);
 
-  // Hide AI panel when AI feature is disabled
+  // Hide analysis panel when feature is disabled
   if (process.env.NEXT_PUBLIC_AI_ENABLED !== 'true') {
     return null;
   }
@@ -34,7 +34,7 @@ export default function AiAnalysisPanel({ analysis, group }: Props) {
     return (
       <aside className="w-72 shrink-0 bg-gray-900 flex items-center justify-center">
         <p className="text-xs text-gray-600 text-center px-4">
-          Select an error group to see AI analysis
+          Select an error group to see smart analysis
         </p>
       </aside>
     );
@@ -43,16 +43,16 @@ export default function AiAnalysisPanel({ analysis, group }: Props) {
   return (
     <aside className="w-72 shrink-0 bg-gray-900 flex flex-col overflow-y-auto">
       <div className="px-4 py-3 border-b border-gray-800 flex items-center justify-between shrink-0">
-        <span className="text-sm font-medium text-white">AI analysis</span>
+        <span className="text-sm font-medium text-white">Smart Analysis</span>
         <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-900 text-emerald-400">
-          Claude
+          Powered
         </span>
       </div>
 
       {!analysis ? (
         <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
           <p className="text-sm text-gray-500 mb-3">
-            AI analysis available on Pro plan
+            Smart analysis available on Pro plan
           </p>
           <a
             href="/pricing"

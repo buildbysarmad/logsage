@@ -39,6 +39,8 @@ CLAUDE_CODE_SETUP.md
 .github/ISSUE_TEMPLATE/
 .github/ISSUE_TEMPLATE/bug_report.md
 .github/ISSUE_TEMPLATE/feature_request.md
+
+# Obsidian
 /.obsidian
 /.obsidian/app.json
 /.obsidian/appearance.json
@@ -48,6 +50,25 @@ CLAUDE_CODE_SETUP.md
 # Task tracking (local only)
 tasks/
 
-#Dev local only
+# Dev local only
 dev-start.ps1
 dev-stop.ps1
+
+# Deployment docs (keep local - sensitive info)
+DEPLOYMENT.md
+PRE_DEPLOYMENT_CHECKLIST.md
+DEPLOYMENT_SUMMARY.md
+
+# Excalidraw diagrams (local sketches)
+*.excalidraw
+
+# Claude mem / code review artifacts
+.code-review-graph/
+.planning/
+
+# Animation documentation (dev notes)
+logsage-web/ANIMATIONS.md
+
+# Helper scripts (local only)
+scripts/generate-secrets.sh
+scripts/verify-deployment.sh
