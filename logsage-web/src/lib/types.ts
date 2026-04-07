@@ -49,6 +49,7 @@ export interface User {
   id: string;
   email: string;
   plan: 'free' | 'pro' | 'team';
+  createdAt?: string;
 }
 
 export interface SessionSummary {

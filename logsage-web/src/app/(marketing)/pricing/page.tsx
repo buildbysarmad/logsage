@@ -3,10 +3,37 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Pricing — LogSage',
-  description: 'Simple pricing for AI-powered log analysis. Free tier available.',
+  description: 'Simple pricing for AI-powered log analysis. Free during early access.',
 };
 
+const pricingEnabled = process.env.NEXT_PUBLIC_PRICING_ENABLED === 'true';
+
 export default function PricingPage() {
+  if (!pricingEnabled) {
+    return (
+      <div className="min-h-screen bg-[#07090d] px-4 py-24 flex items-center justify-center">
+        <div className="max-w-lg mx-auto text-center">
+          <p className="text-emerald-400 text-sm font-medium tracking-widest uppercase mb-4">
+            Early Access
+          </p>
+          <h1 className="text-6xl font-bold text-white mb-6">
+            It&apos;s FREE
+          </h1>
+          <p className="text-gray-400 text-lg mb-10">
+            LogSage is completely free during early access.
+            No credit card. No limits. Just paste your logs.
+          </p>
+          <Link
+            href="/analyze"
+            className="inline-block bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-8 py-3 rounded-lg transition-colors"
+          >
+            Start analyzing logs →
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-950 px-4 py-16">
       <div className="max-w-4xl mx-auto text-center">
