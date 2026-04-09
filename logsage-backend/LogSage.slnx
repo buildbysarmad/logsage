@@ -1,4 +1,6 @@
 <Solution>
+  <Project Path="LogSage.Core/LogSage.Core.csproj" />
+  <Project Path="LogSage.Core.Tests/LogSage.Core.Tests.csproj" />
   <Project Path="LogSage.Api.Tests/LogSage.Api.Tests.csproj" />
   <Project Path="LogSage.Api/LogSage.Api.csproj" />
 </Solution>

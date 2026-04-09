@@ -19,6 +19,41 @@ const createApiClient = (): AxiosInstance => {
     (res) => res,
     async (err) => {
       const original = err.config;
+
+      // Handle network errors (API unreachable)
+      if (!err.response) {
+        console.error('[API] Network error - API unreachable:', err.message);
+
+        // Only clear auth and redirect if this was an authenticated request
+        const hasAuthToken = typeof window !== 'undefined' && localStorage.getItem('access_token');
+        if (hasAuthToken) {
+          console.log('[API] Clearing auth state due to network error');
+
+          // Clear localStorage
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+          }
+
+          // Clear zustand store
+          try {
+            const { useAuthStore } = await import('./auth');
+            const { logout } = useAuthStore.getState();
+            logout();
+          } catch (e) {
+            console.error('[API] Failed to clear auth store:', e);
+          }
+
+          // Redirect to login with reason
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login?reason=network';
+          }
+        }
+
+        return Promise.reject(err);
+      }
+
+      // Handle 401 - try to refresh token
       if (err.response?.status === 401 && !original._retry) {
         original._retry = true;
         try {

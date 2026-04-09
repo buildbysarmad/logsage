@@ -1,3 +1,2 @@
 [build]
 dockerfilePath = "Dockerfile"
-buildArgs = { GITHUB_TOKEN = "${{GITHUB_TOKEN}}" }
