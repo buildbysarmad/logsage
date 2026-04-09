@@ -170,11 +170,19 @@ if (app.Configuration.GetValue<bool>("PRICING_ENABLED"))
     app.MapBillingEndpoints();
 }
 
-if (app.Environment.IsDevelopment())
+// Apply database migrations automatically on startup
+try
 {
+    Log.Information("Applying database migrations...");
     using var scope = app.Services.CreateScope();
-    await scope.ServiceProvider.GetRequiredService<AppDbContext>()
-        .Database.MigrateAsync();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.MigrateAsync();
+    Log.Information("Database migrations applied successfully");
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Failed to apply database migrations");
+    throw;
 }
 
 app.Run();
