@@ -71,6 +71,16 @@ public static class AnalyzeEndpoints
         if (pricingEnabled)
             await sessions.IncrementUsageAsync(identifier, ct);
 
+        // Save session to database (for authenticated users only)
+        if (ctx.User.Identity?.IsAuthenticated == true)
+        {
+            var userIdClaim = ctx.User.FindFirst("sub")?.Value;
+            if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out var userId))
+            {
+                await sessions.SaveSessionAsync(userId, result, ct);
+            }
+        }
+
         return Results.Ok(new AnalysisResponse(result, aiResults, wasTruncated));
     }
 
@@ -108,6 +118,16 @@ public static class AnalyzeEndpoints
 
         if (pricingEnabled)
             await sessions.IncrementUsageAsync(identifier, ct);
+
+        // Save session to database (for authenticated users only)
+        if (ctx.User.Identity?.IsAuthenticated == true)
+        {
+            var userIdClaim = ctx.User.FindFirst("sub")?.Value;
+            if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out var userId))
+            {
+                await sessions.SaveSessionAsync(userId, result, ct);
+            }
+        }
 
         return Results.Ok(new AnalysisResponse(result, aiResults, false));
     }

@@ -20,12 +20,17 @@ function LoginForm() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sessionExpired, setSessionExpired] = useState(false);
+  const [sessionMessage, setSessionMessage] = useState<string | null>(null);
   const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
-    if (searchParams?.get('reason') === 'expired') {
-      setSessionExpired(true);
+    const reason = searchParams?.get('reason');
+    if (reason === 'expired') {
+      setSessionMessage('Your session expired. Please sign in again.');
+    } else if (reason === 'network') {
+      setSessionMessage('Could not connect to the server. Please sign in to try again.');
+    } else if (reason === 'error') {
+      setSessionMessage('An error occurred. Please sign in again.');
     }
   }, [searchParams]);
 
@@ -92,7 +97,7 @@ function LoginForm() {
           <p className="text-gray-400 text-sm mt-2">Sign in to your account</p>
         </motion.div>
 
-        {sessionExpired && (
+        {sessionMessage && (
           <motion.div
             className="bg-yellow-900/20 border border-yellow-700/50 rounded-lg px-4 py-3 mb-4"
             initial={shouldReduceMotion ? false : { opacity: 0, x: -20 }}
@@ -100,7 +105,7 @@ function LoginForm() {
             transition={motionTransitions.smooth}
           >
             <p className="text-yellow-400 text-sm">
-              Your session expired. Please sign in again.
+              {sessionMessage}
             </p>
           </motion.div>
         )}

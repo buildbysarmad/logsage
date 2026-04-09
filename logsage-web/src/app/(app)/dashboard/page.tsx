@@ -59,10 +59,14 @@ export default function DashboardPage() {
         setSessions(sessionsRes.data);
       })
       .catch((err) => {
-        // If it's a 401 error, the interceptor will handle redirect
-        // Just show error state
+        // Network error or auth error - interceptor will handle redirect
+        // This catch should rarely execute since interceptor redirects
         console.error('[Dashboard] Failed to load data:', err);
-        setError('Failed to load dashboard data');
+
+        // If we still got here, something went wrong - force logout
+        const { logout } = useAuthStore.getState();
+        logout();
+        router.push('/login?reason=error');
       })
       .finally(() => setLoading(false));
   }, [router, user, isStoreLoading, tokenExpiry, setUser]);
