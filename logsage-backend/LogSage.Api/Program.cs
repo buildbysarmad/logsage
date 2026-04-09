@@ -22,6 +22,16 @@ Log.Logger = new LoggerConfiguration()
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Railway DATABASE_URL support — convert to Npgsql format
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+if (!string.IsNullOrEmpty(databaseUrl))
+{
+    var uri = new Uri(databaseUrl);
+    var connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={uri.UserInfo.Split(':')[0]};Password={uri.UserInfo.Split(':')[1]};SSL Mode=Require;Trust Server Certificate=true";
+    builder.Configuration["ConnectionStrings:Default"] = connectionString;
+    Log.Information("Using DATABASE_URL from environment (Railway/Heroku format)");
+}
+
 // Configure Kestrel — enforce 2MB max request body size
 builder.WebHost.ConfigureKestrel(options =>
 {
@@ -173,6 +183,13 @@ if (app.Configuration.GetValue<bool>("PRICING_ENABLED"))
 // Apply database migrations automatically on startup
 try
 {
+    var connectionString = app.Configuration.GetConnectionString("Default");
+    if (string.IsNullOrEmpty(connectionString))
+    {
+        Log.Fatal("Database connection string is not configured. Set either DATABASE_URL or ConnectionStrings__Default environment variable.");
+        throw new InvalidOperationException("Database connection string not found. Configure DATABASE_URL or ConnectionStrings__Default.");
+    }
+
     Log.Information("Applying database migrations...");
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
