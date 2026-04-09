@@ -6,7 +6,9 @@ ARG GITHUB_TOKEN
 COPY nuget.config ./
 COPY LogSage.Api/LogSage.Api.csproj LogSage.Api/
 
-RUN dotnet nuget update source github-buildbysarmad \
+RUN dotnet nuget remove source github-buildbysarmad 2>/dev/null || true && \
+    dotnet nuget add source https://nuget.pkg.github.com/buildbysarmad/index.json \
+    --name github-buildbysarmad \
     --username buildbysarmad \
     --password ${GITHUB_TOKEN} \
     --store-password-in-clear-text
