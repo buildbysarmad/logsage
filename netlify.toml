@@ -10,14 +10,15 @@
   NODE_VERSION = "20"
   NPM_VERSION = "10"
 
-# Production environment variables (set in Netlify UI)
-# NEXT_PUBLIC_API_URL = https://api.logsage.dev
-# NEXT_PUBLIC_PRICING_ENABLED = false
-# NEXT_PUBLIC_AI_ENABLED = false
+# Production environment variables
+# Set these in Netlify UI → Site settings → Environment variables
+# NEXT_PUBLIC_API_URL=https://logsage-production.up.railway.app
+# NEXT_PUBLIC_PRICING_ENABLED=false
+# NEXT_PUBLIC_AI_ENABLED=false
 
 [[redirects]]
   from = "/api/*"
-  to = "https://api.logsage.dev/api/:splat"
+  to = "https://logsage-production.up.railway.app/api/:splat"
   status = 200
   force = true
   headers = {X-From = "Netlify"}
