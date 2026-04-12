@@ -1,0 +1,20 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="30" fill="#065f46"/>
+
+  <!-- Scroll/document shape -->
+  <path d="M20 16 C20 14 21 12 23 12 L41 12 C43 12 44 14 44 16 L44 48 C44 50 43 52 41 52 L23 52 C21 52 20 50 20 48 Z" fill="#10b981" stroke="#34d399" stroke-width="1.5"/>
+
+  <!-- Log lines - representing code/logs -->
+  <line x1="26" y1="22" x2="38" y2="22" stroke="#065f46" stroke-width="2" stroke-linecap="round"/>
+  <line x1="26" y1="28" x2="36" y2="28" stroke="#065f46" stroke-width="2" stroke-linecap="round"/>
+  <line x1="26" y1="34" x2="38" y2="34" stroke="#065f46" stroke-width="2" stroke-linecap="round"/>
+  <line x1="26" y1="40" x2="34" y2="40" stroke="#065f46" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Magnifying glass (analysis symbol) -->
+  <circle cx="38" cy="38" r="6" fill="none" stroke="#fbbf24" stroke-width="2.5"/>
+  <line x1="42.5" y1="42.5" x2="47" y2="47" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Error indicator dot (small accent) -->
+  <circle cx="28" cy="22" r="1.5" fill="#ef4444"/>
+</svg>

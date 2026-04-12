@@ -163,9 +163,13 @@ export function ProfileCard({ user }: Props) {
           disabled={loading}
           className="relative w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50
                      disabled:cursor-not-allowed text-white font-medium py-2 rounded-lg
-                     transition-colors text-sm overflow-hidden"
-          whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
-          whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
+                     transition-all text-sm overflow-hidden
+                     shadow-[0_0_20px_rgba(52,211,153,0.3)]"
+          whileHover={shouldReduceMotion || loading ? {} : {
+            scale: 1.02,
+            boxShadow: '0 0 30px rgba(52,211,153,0.5)',
+          }}
+          whileTap={shouldReduceMotion || loading ? {} : { scale: 0.98 }}
         >
           <span className="relative z-10">
             {loading ? 'Changing...' : 'Change password'}

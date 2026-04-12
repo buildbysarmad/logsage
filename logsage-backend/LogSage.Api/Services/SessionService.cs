@@ -63,8 +63,42 @@ public class SessionService(AppDbContext db)
             UserId = userId,
             DetectedFormat = result.DetectedFormat,
             TotalLines = result.TotalLines,
-            ErrorCount = result.ErrorGroups.Count(g => g.Level == Core.Models.LogLevel.Error || g.Level == Core.Models.LogLevel.Fatal),
-            WarningCount = result.ErrorGroups.Count(g => g.Level == Core.Models.LogLevel.Warning),
+            ErrorCount = result.ErrorCount,
+            WarningCount = result.WarningCount,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        // Map error groups
+        foreach (var group in result.ErrorGroups)
+        {
+            session.ErrorGroups.Add(new ErrorGroupEntity
+            {
+                GroupKey = group.GroupKey,
+                RepresentativeMessage = group.RepresentativeMessage,
+                Level = group.Level.ToString(),
+                Count = group.Count,
+                ExceptionType = group.ExceptionType,
+                FirstSeen = group.FirstSeen,
+                LastSeen = group.LastSeen
+            });
+        }
+
+        db.Sessions.Add(session);
+        await db.SaveChangesAsync(ct);
+
+        return session.Id;
+    }
+
+    public async Task<Guid> SaveSessionAsync(
+        Guid? userId, StructuredParseResult result, CancellationToken ct = default)
+    {
+        var session = new Session
+        {
+            UserId = userId,
+            DetectedFormat = result.DetectedFormat,
+            TotalLines = result.TotalLines,
+            ErrorCount = result.ErrorCount,
+            WarningCount = result.WarningCount,
             CreatedAt = DateTime.UtcNow
         };
 

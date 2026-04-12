@@ -17,7 +17,7 @@ public class ErrorGrouperTests
             new() { Level = LogLevel.Error, Message = "SqlException: timeout for userId=3", ExceptionType = "SqlException" },
         };
 
-        var groups = _grouper.Group(entries);
+        var groups = _grouper.Group(entries.Select(e => e.ToStructured("Test")));
 
         Assert.Single(groups);
         Assert.Equal(3, groups[0].Count);
@@ -33,7 +33,7 @@ public class ErrorGrouperTests
             new() { Level = LogLevel.Error, Message = "NullReferenceException: object not set", ExceptionType = "NullReferenceException" },
         };
 
-        var groups = _grouper.Group(entries);
+        var groups = _grouper.Group(entries.Select(e => e.ToStructured("Test")));
 
         Assert.Equal(2, groups.Count);
     }
@@ -47,7 +47,7 @@ public class ErrorGrouperTests
             new() { Level = LogLevel.Error, Message = "SqlException: timeout", ExceptionType = "SqlException" },
         };
 
-        var groups = _grouper.Group(entries);
+        var groups = _grouper.Group(entries.Select(e => e.ToStructured("Test")));
 
         Assert.Single(groups);
     }
@@ -62,7 +62,7 @@ public class ErrorGrouperTests
             new() { Level = LogLevel.Error, ExceptionType = "SqlException", Message = "timeout", Timestamp = now },
         };
 
-        var groups = _grouper.Group(entries);
+        var groups = _grouper.Group(entries.Select(e => e.ToStructured("Test")));
 
         Assert.Equal(now.AddMinutes(-10), groups[0].FirstSeen);
         Assert.Equal(now, groups[0].LastSeen);
