@@ -1,6 +1,7 @@
 using System.Text;
 using System.Threading.RateLimiting;
 using LogSage.Api.Data;
+using LogSage.Api.Data.Repositories;
 using LogSage.Api.Endpoints;
 using LogSage.Api.Infrastructure;
 using LogSage.Api.Middleware;
@@ -66,11 +67,14 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
 builder.Services.AddSingleton<LogSageEngine>();
+builder.Services.AddSingleton<ILogSanitizer, LogSanitizer>();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<AiAnalysisService>();
 builder.Services.AddScoped<SessionService>();
+builder.Services.AddScoped<IParseSessionRepository, ParseSessionRepository>();
 builder.Services.AddScoped<IPaymentProvider, PaddlePaymentProvider>();
 builder.Services.AddScoped<BillingService>();
+builder.Services.AddMemoryCache();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opt => {
@@ -132,6 +136,14 @@ builder.Services.AddRateLimiter(opt =>
     });
     opt.RejectionStatusCode = 429;
 });
+
+// Validate admin key in production
+var adminKey = builder.Configuration["AdminApiKey"];
+if (string.IsNullOrWhiteSpace(adminKey) && !builder.Environment.IsDevelopment())
+{
+    Log.Fatal("AdminApiKey must be configured in production");
+    throw new InvalidOperationException("AdminApiKey must be configured in production.");
+}
 
 var app = builder.Build();
 

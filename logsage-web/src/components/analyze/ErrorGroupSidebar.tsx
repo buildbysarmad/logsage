@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import type { ErrorGroup } from '@/lib/types';
 import { useReducedMotion, motionTransitions } from '@/lib/motion';
@@ -88,11 +89,31 @@ interface Props {
 export default function ErrorGroupSidebar({ groups, selected, onSelect }: Props) {
   const shouldReduceMotion = useReducedMotion();
 
+  // Filter state - all levels visible by default
+  const [visibleLevels, setVisibleLevels] = useState<Set<string>>(
+    new Set(['Fatal', 'Error', 'Warning', 'Info', 'Debug', 'Trace'])
+  );
+
+  const toggleLevel = (level: string) => {
+    setVisibleLevels(prev => {
+      const next = new Set(prev);
+      if (next.has(level)) {
+        next.delete(level);
+      } else {
+        next.add(level);
+      }
+      return next;
+    });
+  };
+
+  // Filter groups by visible levels
+  const filteredGroups = groups.filter(g => visibleLevels.has(g.level));
+
   if (groups.length === 0) {
     return (
       <aside className="w-64 shrink-0 border-r border-gray-800 bg-gray-900 flex items-center justify-center">
         <p className="text-xs text-gray-500 text-center px-4">
-          No errors or warnings found in this log file.
+          No log groups found in this file.
         </p>
       </aside>
     );
@@ -100,6 +121,7 @@ export default function ErrorGroupSidebar({ groups, selected, onSelect }: Props)
 
   return (
     <aside className="w-64 shrink-0 border-r border-gray-800 bg-gray-900 flex flex-col overflow-hidden">
+      {/* Header with count */}
       <motion.div
         className="px-3 py-2.5 border-b border-gray-800 shrink-0 bg-gray-950/50"
         initial={shouldReduceMotion ? undefined : { opacity: 0, y: -10 }}
@@ -107,12 +129,53 @@ export default function ErrorGroupSidebar({ groups, selected, onSelect }: Props)
         transition={motionTransitions.smooth}
       >
         <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-          {groups.length} error group{groups.length !== 1 ? 's' : ''}
+          {filteredGroups.length} of {groups.length} group{groups.length !== 1 ? 's' : ''}
         </p>
       </motion.div>
 
+      {/* Level filter toggles */}
+      <motion.div
+        className="px-2 py-2 border-b border-gray-800 shrink-0 bg-gray-950/30"
+        initial={shouldReduceMotion ? undefined : { opacity: 0, y: -10 }}
+        animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, ...motionTransitions.smooth }}
+      >
+        <div className="flex flex-wrap gap-1">
+          {(['Fatal', 'Error', 'Warning', 'Info', 'Debug', 'Trace'] as const).map((level) => {
+            const isActive = visibleLevels.has(level);
+            const groupCount = groups.filter(g => g.level === level).length;
+
+            if (groupCount === 0) return null; // Hide if no groups at this level
+
+            return (
+              <motion.button
+                key={level}
+                onClick={() => toggleLevel(level)}
+                className={`text-[10px] font-medium px-2 py-1 rounded transition-all ${
+                  isActive
+                    ? levelBadge[level]
+                    : 'bg-gray-800/50 text-gray-600 border border-gray-700/30'
+                }`}
+                whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
+                whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}
+                animate={shouldReduceMotion || !isActive ? {} : {
+                  boxShadow: [
+                    '0 0 0px rgba(0,0,0,0)',
+                    levelGlow[level],
+                    '0 0 0px rgba(0,0,0,0)',
+                  ],
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                {level} ({groupCount})
+              </motion.button>
+            );
+          })}
+        </div>
+      </motion.div>
+
       <div className="flex-1 overflow-y-auto scrollbar-thin min-h-0">
-        {groups.map((group, index) => {
+        {filteredGroups.map((group, index) => {
           const keywords = extractKeywords(group);
           const subtitle = extractSubtitle(group);
           const isSelected = selected?.groupKey === group.groupKey;

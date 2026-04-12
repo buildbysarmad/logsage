@@ -8,7 +8,7 @@ public class LogSageEngineTests
     private readonly LogSageEngine _engine = new();
 
     [Fact]
-    public void LogSageEngine_Analyze_GroupsSimilarErrors()
+    public void LogSageEngine_AnalyzeStructured_GroupsSimilarErrors()
     {
         // Arrange
         var log = @"2024-03-14 02:14:33.123 +05:00 [ERR] SqlException: Connection timeout
@@ -17,7 +17,7 @@ public class LogSageEngineTests
 2024-03-14 02:14:36.012 +05:00 [ERR] SqlException: Connection timeout";
 
         // Act
-        var result = _engine.Analyze(log);
+        var result = _engine.AnalyzeStructured(log);
 
         // Assert
         Assert.True(result.ErrorGroups.Count > 0);
@@ -27,7 +27,7 @@ public class LogSageEngineTests
     }
 
     [Fact]
-    public void LogSageEngine_Analyze_CapsTotalEntries_WhenExceedingLimit()
+    public void LogSageEngine_AnalyzeStructured_CapsTotalEntries_WhenExceedingLimit()
     {
         // Arrange - Create log with many entries using Standard format
         var lines = new List<string>();
@@ -38,7 +38,7 @@ public class LogSageEngineTests
         var largeLog = string.Join('\n', lines);
 
         // Act
-        var result = _engine.Analyze(largeLog);
+        var result = _engine.AnalyzeStructured(largeLog);
 
         // Assert
         Assert.Equal(100, result.TotalLines);
@@ -48,15 +48,15 @@ public class LogSageEngineTests
     }
 
     [Fact]
-    public void LogSageEngine_Analyze_HandlesEmptyInput()
+    public void LogSageEngine_AnalyzeStructured_HandlesEmptyInput()
     {
         // Arrange
         var emptyLog = "";
         var whitespaceLog = "   \n  \n  ";
 
         // Act
-        var emptyResult = _engine.Analyze(emptyLog);
-        var whitespaceResult = _engine.Analyze(whitespaceLog);
+        var emptyResult = _engine.AnalyzeStructured(emptyLog);
+        var whitespaceResult = _engine.AnalyzeStructured(whitespaceLog);
 
         // Assert
         Assert.NotNull(emptyResult);

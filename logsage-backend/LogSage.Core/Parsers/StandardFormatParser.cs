@@ -5,7 +5,7 @@ namespace LogSage.Core.Parsers;
 
 // Handles: 2024-03-14 02:14:33 [ERROR] Message
 //          2024-03-14T02:14:33 ERROR Message
-public class StandardFormatParser : BaseLogParser
+public class StandardFormatParser : BaseStructuredLogParser, ILogParser
 {
     public override string FormatName => "Standard";
 
@@ -21,7 +21,24 @@ public class StandardFormatParser : BaseLogParser
         return lines.Count(l => EntryRegex.IsMatch(l.Trim())) >= 2;
     }
 
-    public override IEnumerable<LogEntry> Parse(string rawLog)
+    public IEnumerable<LogEntry> Parse(string rawLog)
+    {
+        foreach (var structured in ParseStructured(rawLog))
+        {
+            yield return new LogEntry
+            {
+                Timestamp = structured.Timestamp,
+                Level = structured.Level,
+                Message = structured.Message,
+                LineNumber = structured.LineNumber,
+                RawLine = structured.RawLine,
+                StackTrace = structured.StackTrace,
+                ExceptionType = structured.ExceptionType
+            };
+        }
+    }
+
+    public override IEnumerable<StructuredLogEntry> ParseStructured(string rawLog)
     {
         var lines = rawLog.Split('\n');
         var lineNum = 0;
@@ -39,17 +56,29 @@ public class StandardFormatParser : BaseLogParser
                 : m.Groups["msg"].Value;
 
             var (body, stack) = SplitStackTrace(fullMsg);
+            var exceptionType = ExtractExceptionType(body);
 
-            yield return new LogEntry
+            var structured = new StructuredLogEntry
             {
                 Timestamp = DateTime.TryParse(m.Groups["ts"].Value, out var ts) ? ts : null,
                 Level = ParseLevel(m.Groups["lvl"].Value),
                 Message = body,
-                StackTrace = stack,
-                ExceptionType = ExtractExceptionType(body),
                 LineNumber = lineNum,
-                RawLine = string.Join(Environment.NewLine, group)
+                RawLine = string.Join(Environment.NewLine, group),
+                ParserType = FormatName,
+                FieldSections = []
             };
+
+            var sections = new List<FieldSection>();
+            var sectionOrder = 0;
+
+            // Section 1: Exception Details (only section for standard format)
+            var exceptionSection = CreateExceptionSection(exceptionType, stack, sectionOrder++);
+            if (exceptionSection != null)
+                sections.Add(exceptionSection);
+
+            structured.FieldSections = sections;
+            yield return structured;
         }
     }
 }

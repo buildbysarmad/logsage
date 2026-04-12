@@ -125,7 +125,12 @@
     @apply bg-background text-foreground;
   }
   html {
-    @apply font-sans;
+    @apply font-sans scroll-smooth;
+  }
+
+  /* Better focus outlines for accessibility */
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-emerald-500;
   }
 
   /* Custom scrollbar styles - Always visible */

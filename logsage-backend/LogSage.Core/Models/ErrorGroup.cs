@@ -8,7 +8,7 @@ public class ErrorGroup
     public int Count { get; set; }
     public DateTime? FirstSeen { get; set; }
     public DateTime? LastSeen { get; set; }
-    public List<LogEntry> Entries { get; set; } = new();
+    public List<StructuredLogEntry> Entries { get; set; } = [];
     public string? ExceptionType { get; set; }
     public string? Source { get; set; }
 }
