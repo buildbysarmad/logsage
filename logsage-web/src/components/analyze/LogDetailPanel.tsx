@@ -3,7 +3,6 @@
 import { motion } from 'framer-motion';
 import type { ErrorGroup } from '@/lib/types';
 import { useReducedMotion, motionTransitions } from '@/lib/motion';
-import FieldSectionRenderer from './FieldSectionRenderer';
 import DisplayFieldRenderer from './DisplayFieldRenderer';
 
 const lineClass: Record<string, string> = {

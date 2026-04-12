@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useReducedMotion } from '@/lib/motion';
@@ -7,13 +8,13 @@ import { useReducedMotion } from '@/lib/motion';
 const pricingEnabled = process.env.NEXT_PUBLIC_PRICING_ENABLED === 'true';
 
 const FloatingParticles = () => {
-  const particles = Array.from({ length: 20 }, (_, i) => ({
+  const [particles] = useState(() => Array.from({ length: 20 }, (_, i) => ({
     id: i,
     x: Math.random() * 100,
     y: Math.random() * 100,
     delay: Math.random() * 2,
     duration: 3 + Math.random() * 2,
-  }));
+  })));
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
