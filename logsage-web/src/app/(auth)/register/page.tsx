@@ -68,26 +68,55 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative">
+    <div className="min-h-screen flex flex-col p-4 relative">
       <AnimatedBackground />
 
-      <motion.div
-        className="w-full max-w-sm relative z-10"
-        initial={shouldReduceMotion ? false : motionVariants.scaleUp.initial}
-        animate={shouldReduceMotion ? false : motionVariants.scaleUp.animate}
-        transition={motionTransitions.springy}
+      {/* Header with back to home */}
+      <motion.header
+        className="w-full max-w-6xl mx-auto py-4 relative z-10"
+        initial={shouldReduceMotion ? false : { opacity: 0, y: -20 }}
+        animate={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+        transition={motionTransitions.smooth}
       >
+        <Link href="/">
+          <motion.div
+            className="inline-flex items-center gap-2 text-gray-400 hover:text-emerald-400 transition-colors group"
+            whileHover={shouldReduceMotion ? {} : { x: -4 }}
+            whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
+          >
+            <motion.svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              animate={shouldReduceMotion ? {} : { x: [0, -2, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </motion.svg>
+            <span className="text-sm font-medium">Back to Home</span>
+          </motion.div>
+        </Link>
+      </motion.header>
+
+      <div className="flex-1 flex items-center justify-center">
         <motion.div
-          className="text-center mb-8"
-          initial={shouldReduceMotion ? false : { opacity: 0, y: -20 }}
-          animate={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, ...motionTransitions.smooth }}
+          className="w-full max-w-sm relative z-10"
+          initial={shouldReduceMotion ? false : motionVariants.scaleUp.initial}
+          animate={shouldReduceMotion ? false : motionVariants.scaleUp.animate}
+          transition={motionTransitions.springy}
         >
-          <h1 className="text-2xl font-semibold text-white">
-            Log<span className="text-emerald-400">Sage</span>
-          </h1>
-          <p className="text-gray-400 text-sm mt-2">Create a free account</p>
-        </motion.div>
+          <motion.div
+            className="text-center mb-8"
+            initial={shouldReduceMotion ? false : { opacity: 0, y: -20 }}
+            animate={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, ...motionTransitions.smooth }}
+          >
+            <h1 className="text-2xl font-semibold text-white">
+              Log<span className="text-emerald-400">Sage</span>
+            </h1>
+            <p className="text-gray-400 text-sm mt-2">Create a free account</p>
+          </motion.div>
 
         <motion.div
           className="bg-gray-900/80 backdrop-blur-sm border border-gray-800 rounded-xl p-6"
@@ -139,10 +168,14 @@ export default function RegisterPage() {
               type="submit"
               disabled={loading}
               className="relative w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50
-                         text-white font-medium py-2.5 rounded-lg transition-all duration-300
-                         overflow-hidden group"
-              whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
-              whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
+                         disabled:cursor-not-allowed text-white font-medium py-2.5 rounded-lg
+                         transition-all duration-300 overflow-hidden group
+                         shadow-[0_0_20px_rgba(52,211,153,0.3)]"
+              whileHover={shouldReduceMotion || loading ? {} : {
+                scale: 1.02,
+                boxShadow: '0 0 30px rgba(52,211,153,0.5)',
+              }}
+              whileTap={shouldReduceMotion || loading ? {} : { scale: 0.98 }}
             >
               <span className="relative z-10">
                 {loading ? 'Creating account...' : 'Create account'}
@@ -163,7 +196,8 @@ export default function RegisterPage() {
             </Link>
           </p>
         </motion.div>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 }

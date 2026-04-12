@@ -4,7 +4,7 @@ using LogSage.Core.Models;
 namespace LogSage.Core.Parsers;
 
 // Fallback: handles "ERROR: message" or any line with a level keyword
-public class PlainTextParser : BaseLogParser
+public class PlainTextParser : BaseStructuredLogParser, ILogParser
 {
     public override string FormatName => "Plain";
 
@@ -18,7 +18,23 @@ public class PlainTextParser : BaseLogParser
     public override bool CanParse(string sampleLines) =>
         sampleLines.Split('\n').Any(l => LevelRegex.IsMatch(l));
 
-    public override IEnumerable<LogEntry> Parse(string rawLog)
+    public IEnumerable<LogEntry> Parse(string rawLog)
+    {
+        foreach (var structured in ParseStructured(rawLog))
+        {
+            yield return new LogEntry
+            {
+                Timestamp = structured.Timestamp,
+                Level = structured.Level,
+                Message = structured.Message,
+                LineNumber = structured.LineNumber,
+                RawLine = structured.RawLine,
+                ExceptionType = structured.ExceptionType
+            };
+        }
+    }
+
+    public override IEnumerable<StructuredLogEntry> ParseStructured(string rawLog)
     {
         var lines = rawLog.Split('\n');
         var lineNum = 0;
@@ -33,16 +49,29 @@ public class PlainTextParser : BaseLogParser
             if (!levelMatch.Success) continue;
 
             var tsMatch = TimestampRegex.Match(trimmed);
+            var exceptionType = ExtractExceptionType(trimmed);
 
-            yield return new LogEntry
+            var structured = new StructuredLogEntry
             {
                 Timestamp = tsMatch.Success && DateTime.TryParse(tsMatch.Value, out var ts) ? ts : null,
                 Level = ParseLevel(levelMatch.Groups["lvl"].Value),
                 Message = levelMatch.Groups["msg"].Value.Trim(),
-                ExceptionType = ExtractExceptionType(trimmed),
                 LineNumber = lineNum,
-                RawLine = trimmed
+                RawLine = trimmed,
+                ParserType = FormatName,
+                FieldSections = []
             };
+
+            var sections = new List<FieldSection>();
+            var sectionOrder = 0;
+
+            // Section 1: Exception Details (if detected)
+            var exceptionSection = CreateExceptionSection(exceptionType, null, sectionOrder++);
+            if (exceptionSection != null)
+                sections.Add(exceptionSection);
+
+            structured.FieldSections = sections;
+            yield return structured;
         }
     }
 }

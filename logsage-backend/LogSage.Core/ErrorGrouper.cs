@@ -6,9 +6,9 @@ namespace LogSage.Core;
 public class ErrorGrouper
 {
     private static readonly LogLevel[] GroupedLevels =
-        [LogLevel.Error, LogLevel.Fatal, LogLevel.Warning];
+        [LogLevel.Fatal, LogLevel.Error, LogLevel.Warning, LogLevel.Info, LogLevel.Debug, LogLevel.Trace];
 
-    public List<ErrorGroup> Group(IEnumerable<LogEntry> entries)
+    public List<ErrorGroup> Group(IEnumerable<StructuredLogEntry> entries)
     {
         var groups = new Dictionary<string, ErrorGroup>();
 
@@ -49,7 +49,7 @@ public class ErrorGrouper
             .ToList();
     }
 
-    private static string BuildGroupKey(LogEntry entry)
+    private static string BuildGroupKey(StructuredLogEntry entry)
     {
         if (!string.IsNullOrEmpty(entry.ExceptionType))
         {

@@ -69,9 +69,9 @@ public class AiAnalysisServiceTests
                 Level = LogSage.Core.Models.LogLevel.Error,
                 FirstSeen = DateTime.UtcNow,
                 LastSeen = DateTime.UtcNow,
-                Entries = new List<LogEntry>
+                Entries = new List<StructuredLogEntry>
                 {
-                    new() { Level = LogSage.Core.Models.LogLevel.Error, Message = "Test error", RawLine = "[ERR] Test error" }
+                    new StructuredLogEntry() { Level = LogSage.Core.Models.LogLevel.Error, Message = "Test error", RawLine = "[ERR] Test error" }
                 }
             }
         };
@@ -107,9 +107,9 @@ public class AiAnalysisServiceTests
                 Level = LogSage.Core.Models.LogLevel.Warning,
                 FirstSeen = DateTime.UtcNow,
                 LastSeen = DateTime.UtcNow,
-                Entries = new List<LogEntry>
+                Entries = new List<StructuredLogEntry>
                 {
-                    new() { Level = LogSage.Core.Models.LogLevel.Warning, Message = "Warning", RawLine = "[WRN] Warning" }
+                    new StructuredLogEntry() { Level = LogSage.Core.Models.LogLevel.Warning, Message = "Warning", RawLine = "[WRN] Warning" }
                 }
             },
             new()
@@ -120,9 +120,9 @@ public class AiAnalysisServiceTests
                 Level = LogSage.Core.Models.LogLevel.Info,
                 FirstSeen = DateTime.UtcNow,
                 LastSeen = DateTime.UtcNow,
-                Entries = new List<LogEntry>
+                Entries = new List<StructuredLogEntry>
                 {
-                    new() { Level = LogSage.Core.Models.LogLevel.Info, Message = "Info", RawLine = "[INF] Info" }
+                    new StructuredLogEntry() { Level = LogSage.Core.Models.LogLevel.Info, Message = "Info", RawLine = "[INF] Info" }
                 }
             }
         };

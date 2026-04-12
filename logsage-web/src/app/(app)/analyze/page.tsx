@@ -21,6 +21,12 @@ export default function AnalyzePage() {
   const shouldReduceMotion = useReducedMotion();
 
   const analyze = async (rawLog: string) => {
+    // Validate input is not empty
+    if (!rawLog || !rawLog.trim()) {
+      setError('Please enter log content to analyze.');
+      return;
+    }
+
     // Validate line count before submission
     const lineCount = rawLog.split('\n').length;
     if (lineCount > 5000) {
@@ -44,6 +50,12 @@ export default function AnalyzePage() {
 
   const onDrop = useCallback(async (files: File[]) => {
     if (!files[0]) return;
+
+    // Validate file is not empty
+    if (files[0].size === 0) {
+      setError('File is empty. Please select a file with log content.');
+      return;
+    }
 
     // Validate file size before upload
     const fileSizeMB = files[0].size / (1024 * 1024);
@@ -107,13 +119,21 @@ export default function AnalyzePage() {
               <motion.button
                 key={t}
                 onClick={() => setTab(t)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all relative ${
                   tab === t
-                    ? 'bg-emerald-600 text-white'
-                    : 'bg-gray-800 text-gray-400 hover:text-white'
+                    ? 'bg-emerald-600 text-white shadow-[0_0_20px_rgba(52,211,153,0.3)]'
+                    : 'bg-gray-800 text-gray-400 hover:text-white hover:shadow-[0_0_15px_rgba(52,211,153,0.15)]'
                 }`}
-                whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
+                whileHover={shouldReduceMotion ? {} : { scale: 1.05, y: -2 }}
                 whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}
+                animate={shouldReduceMotion || tab !== t ? {} : {
+                  boxShadow: [
+                    '0 0 20px rgba(52,211,153,0.3)',
+                    '0 0 30px rgba(52,211,153,0.5)',
+                    '0 0 20px rgba(52,211,153,0.3)',
+                  ],
+                }}
+                transition={tab === t ? { duration: 2, repeat: Infinity } : {}}
               >
                 {t === 'upload' ? 'File upload' : 'Paste text'}
               </motion.button>
@@ -186,9 +206,13 @@ export default function AnalyzePage() {
                   disabled={!paste.trim() || loading}
                   className="relative mt-3 w-full bg-emerald-600 hover:bg-emerald-500
                              disabled:opacity-50 disabled:cursor-not-allowed
-                             text-white font-medium py-2.5 rounded-lg transition-all overflow-hidden"
-                  whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
-                  whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
+                             text-white font-medium py-2.5 rounded-lg transition-all overflow-hidden
+                             shadow-[0_0_20px_rgba(52,211,153,0.3)]"
+                  whileHover={shouldReduceMotion || !paste.trim() || loading ? {} : {
+                    scale: 1.02,
+                    boxShadow: '0 0 30px rgba(52,211,153,0.5)',
+                  }}
+                  whileTap={shouldReduceMotion || !paste.trim() || loading ? {} : { scale: 0.98 }}
                 >
                   <span className="relative z-10">
                     {loading ? 'Analyzing...' : 'Analyze logs'}
@@ -277,6 +301,36 @@ export default function AnalyzePage() {
           >
             {result.warningCount} warnings
           </motion.span>
+          {result.infoCount > 0 && (
+            <motion.span
+              className="text-blue-400"
+              initial={shouldReduceMotion ? false : { opacity: 0 }}
+              animate={shouldReduceMotion ? false : { opacity: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              {result.infoCount} info
+            </motion.span>
+          )}
+          {result.debugCount > 0 && (
+            <motion.span
+              className="text-gray-400"
+              initial={shouldReduceMotion ? false : { opacity: 0 }}
+              animate={shouldReduceMotion ? false : { opacity: 1 }}
+              transition={{ delay: 0.6 }}
+            >
+              {result.debugCount} debug
+            </motion.span>
+          )}
+          {result.parseErrorCount > 0 && (
+            <motion.span
+              className="text-red-500 font-semibold"
+              initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.8 }}
+              animate={shouldReduceMotion ? false : { opacity: 1, scale: 1 }}
+              transition={{ delay: 0.7 }}
+            >
+              ⚠ {result.parseErrorCount} parse errors
+            </motion.span>
+          )}
           {result.wasTruncated && (
             <motion.span
               className="text-orange-400"

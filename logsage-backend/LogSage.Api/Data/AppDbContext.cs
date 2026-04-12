@@ -11,6 +11,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<ErrorGroupEntity> ErrorGroups => Set<ErrorGroupEntity>();
     public DbSet<UsageTracking> UsageTracking => Set<UsageTracking>();
     public DbSet<Subscription> Subscriptions => Set<Subscription>();
+    public DbSet<ParseSession> ParseSessions => Set<ParseSession>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -53,6 +54,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
              .WithMany()
              .HasForeignKey(s => s.UserId)
              .OnDelete(DeleteBehavior.Cascade);
+        });
+        b.Entity<ParseSession>(e => {
+            e.HasKey(p => p.Id);
+            e.HasIndex(p => p.SessionToken);
+            e.Property(p => p.SessionToken).HasMaxLength(64);
+            e.Property(p => p.DetectedFormat).HasMaxLength(50);
+            e.Property(p => p.FeedbackNote).HasMaxLength(500);
         });
     }
 }
