@@ -40,28 +40,36 @@ builder.WebHost.ConfigureKestrel(options =>
 });
 
 // Configure Serilog
-builder.Host.UseSerilog((ctx, services, lc) => lc
-    .ReadFrom.Configuration(ctx.Configuration)
-    .ReadFrom.Services(services)
-    .Enrich.FromLogContext()
-    .Enrich.WithEnvironmentName()
-    .Enrich.WithThreadId()
-    .Enrich.WithProcessId()
-    .Enrich.WithProperty("Application", "LogSage.Api")
-    .WriteTo.Console(outputTemplate:
-        "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}")
-    .WriteTo.GrafanaLoki(
-        ctx.Configuration["Grafana:LokiUrl"] ?? "",
-        credentials: null,
-        labels: new[]
-        {
-            new LokiLabel { Key = "app", Value = "logsage-api" },
-            new LokiLabel { Key = "env", Value = ctx.HostingEnvironment.EnvironmentName },
-            new LokiLabel { Key = "version", Value = "1.0.0" }
-        },
-        restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information
-    )
-);
+builder.Host.UseSerilog((ctx, services, lc) =>
+{
+    var loggerConfig = lc
+        .ReadFrom.Configuration(ctx.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext()
+        .Enrich.WithEnvironmentName()
+        .Enrich.WithThreadId()
+        .Enrich.WithProcessId()
+        .Enrich.WithProperty("Application", "LogSage.Api")
+        .WriteTo.Console(outputTemplate:
+            "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
+
+    // Only configure Grafana Loki if URL is provided
+    var lokiUrl = ctx.Configuration["Grafana:LokiUrl"];
+    if (!string.IsNullOrWhiteSpace(lokiUrl))
+    {
+        loggerConfig.WriteTo.GrafanaLoki(
+            lokiUrl,
+            credentials: null,
+            labels: new[]
+            {
+                new LokiLabel { Key = "app", Value = "logsage-api" },
+                new LokiLabel { Key = "env", Value = ctx.HostingEnvironment.EnvironmentName },
+                new LokiLabel { Key = "version", Value = "1.0.0" }
+            },
+            restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information
+        );
+    }
+});
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
@@ -78,6 +86,7 @@ builder.Services.AddMemoryCache();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opt => {
+        opt.MapInboundClaims = false; // keep "sub" as "sub", not remapped to nameidentifier URI
         opt.TokenValidationParameters = new TokenValidationParameters {
             ValidateIssuer = true, ValidateAudience = true,
             ValidateLifetime = true, ValidateIssuerSigningKey = true,
@@ -144,6 +153,10 @@ if (string.IsNullOrWhiteSpace(adminKey) && !builder.Environment.IsDevelopment())
     Log.Fatal("AdminApiKey must be configured in production");
     throw new InvalidOperationException("AdminApiKey must be configured in production.");
 }
+else if (builder.Environment.IsDevelopment() && string.IsNullOrWhiteSpace(adminKey))
+{
+    Log.Warning("AdminApiKey is not configured. Admin endpoints will use 'dev-admin-key' in development mode.");
+}
 
 var app = builder.Build();
 
@@ -183,6 +196,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapHealthChecks("/health");
+app.MapGet("/favicon.ico", () => Results.NoContent()).ExcludeFromDescription();
 app.MapAnalyzeEndpoints();
 app.MapAuthEndpoints();
 

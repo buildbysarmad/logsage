@@ -25,6 +25,5 @@ public class ParseSession
 
     // Feedback
     public int? FeedbackScore { get; set; }         // 1 = thumbs up, -1 = thumbs down
-    public string? FeedbackNote { get; set; }
     public DateTime? FeedbackAt { get; set; }
 }

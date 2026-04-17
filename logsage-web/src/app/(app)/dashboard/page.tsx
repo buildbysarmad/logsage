@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { authApi, analyzeApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/auth';
@@ -11,6 +10,7 @@ import { ProfileCard } from '@/components/dashboard/ProfileCard';
 import { StatsCard } from '@/components/dashboard/StatsCard';
 import { SessionHistoryTable } from '@/components/dashboard/SessionHistoryTable';
 import { AnimatedBackground } from '@/components/motion/AnimatedBackground';
+import { NewAnalysisButton } from '@/components/ui/NewAnalysisButton';
 import { useReducedMotion, motionTransitions } from '@/lib/motion';
 
 export default function DashboardPage() {
@@ -23,9 +23,23 @@ export default function DashboardPage() {
   const tokenExpiry = useAuthStore((s) => s.tokenExpiry);
   const setUser = useAuthStore((s) => s.setUser);
 
+  const logout = useAuthStore((s) => s.logout);
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error] = useState<string | null>(null);
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      await authApi.logout();
+    } catch {
+      // Fire-and-forget — revoke server-side token best-effort
+    } finally {
+      logout();
+      router.push('/login?reason=logout');
+    }
+  };
 
   useEffect(() => {
     // Wait for Zustand to finish rehydrating
@@ -120,14 +134,21 @@ export default function DashboardPage() {
           transition={motionTransitions.smooth}
         >
           <h1 className="text-2xl font-semibold text-white">Dashboard</h1>
-          <motion.div whileHover={shouldReduceMotion ? {} : { scale: 1.05 }} whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}>
-            <Link
-              href="/analyze"
-              className="text-sm bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg transition-colors"
-            >
+          <div className="flex items-center gap-3">
+            <NewAnalysisButton href="/analyze" size="sm">
               New analysis
-            </Link>
-          </motion.div>
+            </NewAnalysisButton>
+            <motion.button
+              onClick={handleLogout}
+              disabled={loggingOut}
+              className="text-sm text-gray-400 hover:text-red-400 disabled:opacity-50 disabled:cursor-not-allowed
+                         px-4 py-2 rounded-lg border border-gray-700 hover:border-red-800 transition-colors"
+              whileHover={shouldReduceMotion || loggingOut ? {} : { scale: 1.05 }}
+              whileTap={shouldReduceMotion || loggingOut ? {} : { scale: 0.95 }}
+            >
+              {loggingOut ? 'Signing out...' : 'Sign out'}
+            </motion.button>
+          </div>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">

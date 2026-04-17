@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/lib/auth';
 import { authApi } from '@/lib/api';
+import { NewAnalysisButton } from '@/components/ui/NewAnalysisButton';
 
 export function MarketingNav() {
   const user = useAuthStore((s) => s.user);
@@ -54,12 +55,9 @@ export function MarketingNav() {
             >
               Sign in
             </Link>
-            <Link
-              href="/analyze"
-              className="text-sm bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-1.5 rounded-lg transition-colors"
-            >
+            <NewAnalysisButton href="/analyze" size="sm">
               Try free
-            </Link>
+            </NewAnalysisButton>
           </>
         )}
       </div>

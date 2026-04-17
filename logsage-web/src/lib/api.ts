@@ -53,8 +53,9 @@ const createApiClient = (): AxiosInstance => {
         return Promise.reject(err);
       }
 
-      // Handle 401 - try to refresh token
-      if (err.response?.status === 401 && !original._retry) {
+      // Handle 401 - try to refresh token (skip for auth endpoints to avoid redirect loops)
+      const isAuthEndpoint = original.url?.includes('/api/auth/');
+      if (err.response?.status === 401 && !original._retry && !isAuthEndpoint) {
         original._retry = true;
         try {
           const refresh = localStorage.getItem('refresh_token');
@@ -120,6 +121,9 @@ export const analyzeApi = {
 
   getSession: (id: string) =>
     api.get<AnalysisResult>(`/api/sessions/${id}`),
+
+  submitFeedback: (sessionToken: string, score: 1 | -1) =>
+    api.post(`/api/sessions/${sessionToken}/feedback`, { score }),
 };
 
 export const authApi = {

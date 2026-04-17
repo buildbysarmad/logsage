@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { NewAnalysisButton } from '@/components/ui/NewAnalysisButton';
 
 const SAMPLE_LOGS = [
   '[ERROR] NullReferenceException at UserService.GetProfile()',
@@ -156,17 +157,9 @@ export function AnimatedHero() {
           transition={{ duration: 0.6, delay: 1.2 }}
           className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8"
         >
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Link
-              href="/analyze"
-              className="relative group inline-block"
-            >
-              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-600 to-violet-600 rounded-xl blur opacity-50 group-hover:opacity-100 transition duration-300" />
-              <div className="relative bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-semibold px-8 py-4 rounded-xl text-lg transition-all duration-300">
-                Analyze your logs free
-              </div>
-            </Link>
-          </motion.div>
+          <NewAnalysisButton href="/analyze" size="lg">
+            Analyze your logs free
+          </NewAnalysisButton>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Link
               href="/pricing"

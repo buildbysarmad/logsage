@@ -7,7 +7,7 @@ public interface IParseSessionRepository
 {
     Task<ParseSession> CreateAsync(ParseSession session, CancellationToken ct = default);
     Task<ParseSession?> GetByTokenAsync(string token, CancellationToken ct = default);
-    Task UpdateFeedbackAsync(string token, int score, string? note, CancellationToken ct = default);
+    Task UpdateFeedbackAsync(string token, int score, CancellationToken ct = default);
     Task<(List<ParseSessionSummary> Items, int Total)> GetPagedAsync(
         ParseSessionFilter filter, int page, int pageSize, CancellationToken ct = default);
 }
@@ -29,7 +29,6 @@ public record ParseSessionSummary(
     int ErrorCount,
     int ParseErrorCount,
     int? FeedbackScore,
-    string? FeedbackNote,
     int InputSizeBytes,
     int InputLineCount,
     int DurationMs
@@ -51,7 +50,7 @@ public class ParseSessionRepository(AppDbContext db) : IParseSessionRepository
             .FirstOrDefaultAsync(s => s.SessionToken == token, ct);
     }
 
-    public async Task UpdateFeedbackAsync(string token, int score, string? note, CancellationToken ct = default)
+    public async Task UpdateFeedbackAsync(string token, int score, CancellationToken ct = default)
     {
         var session = await db.ParseSessions
             .FirstOrDefaultAsync(s => s.SessionToken == token, ct);
@@ -60,7 +59,6 @@ public class ParseSessionRepository(AppDbContext db) : IParseSessionRepository
             return;
 
         session.FeedbackScore = score;
-        session.FeedbackNote = note;
         session.FeedbackAt = DateTime.UtcNow;
 
         await db.SaveChangesAsync(ct);
@@ -108,7 +106,6 @@ public class ParseSessionRepository(AppDbContext db) : IParseSessionRepository
                 s.ErrorCount,
                 s.ParseErrorCount,
                 s.FeedbackScore,
-                s.FeedbackNote,
                 s.InputSizeBytes,
                 s.InputLineCount,
                 s.DurationMs
