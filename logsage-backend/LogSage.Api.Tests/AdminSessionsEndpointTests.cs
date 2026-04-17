@@ -155,7 +155,7 @@ public class AdminSessionsEndpointTests
             DurationMs = 50
         };
         await repo.CreateAsync(sessionWithFeedback);
-        await repo.UpdateFeedbackAsync("with-feedback", 1, "Great!");
+        await repo.UpdateFeedbackAsync("with-feedback", 1);
 
         await repo.CreateAsync(new ParseSession
         {
