@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '@/lib/auth';
 import { authApi } from '@/lib/api';
+import { NewAnalysisButton } from '@/components/ui/NewAnalysisButton';
 
 export function AnimatedNav() {
   const [scrolled, setScrolled] = useState(false);
@@ -81,12 +82,9 @@ export function AnimatedNav() {
               >
                 Sign in
               </Link>
-              <Link
-                href="/analyze"
-                className="text-sm bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white px-5 py-2 rounded-lg transition-all duration-300 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 font-medium"
-              >
+              <NewAnalysisButton href="/analyze" size="sm">
                 Try free
-              </Link>
+              </NewAnalysisButton>
             </>
           )}
         </div>

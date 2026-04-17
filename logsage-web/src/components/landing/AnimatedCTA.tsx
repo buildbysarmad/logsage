@@ -1,8 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
+import { NewAnalysisButton } from '@/components/ui/NewAnalysisButton';
 
 export function AnimatedCTA() {
   const ref = useRef(null);
@@ -54,37 +54,10 @@ export function AnimatedCTA() {
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.4 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="inline-block relative group"
           >
-            {/* Shimmer effect */}
-            <motion.div
-              className="absolute -inset-1 bg-gradient-to-r from-emerald-600 via-violet-600 to-emerald-600 rounded-xl blur opacity-50 group-hover:opacity-100"
-              animate={{
-                backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: 'linear',
-              }}
-              style={{ backgroundSize: '200% 200%' }}
-            />
-
-            <Link
-              href="/analyze"
-              className="relative inline-block bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold px-10 py-5 rounded-xl text-lg transition-all duration-300 shadow-2xl shadow-emerald-500/30"
-            >
+            <NewAnalysisButton href="/analyze" size="lg">
               Start analyzing for free
-              <motion.span
-                className="inline-block ml-2"
-                animate={{ x: [0, 5, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              >
-                →
-              </motion.span>
-            </Link>
+            </NewAnalysisButton>
           </motion.div>
 
           <motion.p

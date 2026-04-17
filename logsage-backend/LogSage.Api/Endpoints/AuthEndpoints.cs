@@ -46,7 +46,7 @@ public static class AuthEndpoints
         var user = await db.Users
             .FirstOrDefaultAsync(u => u.Email == req.Email.ToLowerInvariant(), ct);
         if (user == null || !BCrypt.Net.BCrypt.Verify(req.Password, user.PasswordHash))
-            return Results.Unauthorized();
+            return Results.Json(new { error = "Invalid email or password" }, statusCode: 401);
         return Results.Ok(await GenerateTokensAsync(user, db, config, ct));
     }
 
@@ -93,7 +93,10 @@ public static class AuthEndpoints
         if (email == null || plan == null)
             return Results.Unauthorized();
 
-        return Results.Ok(new UserResponse(userId, email, plan));
+        var createdAtStr = ctx.User.FindFirst("createdAt")?.Value;
+        DateTime? createdAt = createdAtStr != null && DateTime.TryParse(createdAtStr, out var dt) ? dt : null;
+
+        return Results.Ok(new UserResponse(userId, email, plan, createdAt));
     }
 
     internal static async Task<IResult> ChangePassword(
@@ -132,7 +135,8 @@ public static class AuthEndpoints
         var claims = new[] {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(ClaimTypes.Email, user.Email),
-            new Claim("plan", user.Plan)
+            new Claim("plan", user.Plan),
+            new Claim("createdAt", user.CreatedAt.ToString("O"))
         };
         var accessToken = new JwtSecurityTokenHandler().WriteToken(
             new JwtSecurityToken(config["Jwt:Issuer"], config["Jwt:Audience"],

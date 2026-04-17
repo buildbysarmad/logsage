@@ -31,6 +31,8 @@ function LoginForm() {
       setSessionMessage('Could not connect to the server. Please sign in to try again.');
     } else if (reason === 'error') {
       setSessionMessage('An error occurred. Please sign in again.');
+    } else if (reason === 'logout') {
+      setSessionMessage('You have been signed out.');
     }
   }, [searchParams]);
 
@@ -50,24 +52,25 @@ function LoginForm() {
       setUser(user, tokenExpiry);
       router.push('/analyze');
     } catch (err: unknown) {
-      // Check if it's an HTTP error response
       if (axios.isAxiosError(err) && err.response) {
         const status = err.response.status;
+        const body = err.response.data as { error?: string; message?: string } | undefined;
+        const serverMessage = body?.error ?? body?.message;
 
         if (status === 401) {
-          setError('Incorrect email or password.');
+          setError(serverMessage ?? 'Incorrect email or password.');
+        } else if (status === 400) {
+          setError(serverMessage ?? 'Please check your details and try again.');
         } else if (status === 429) {
           setError('Too many attempts. Please wait a moment and try again.');
         } else if (status === 500) {
           setError('Server error. Please try again in a moment.');
         } else {
-          setError('Something went wrong. Please try again.');
+          setError(serverMessage ?? 'Something went wrong. Please try again.');
         }
       } else if (axios.isAxiosError(err) && err.request) {
-        // Network error - request was made but no response received
         setError('Could not connect. Please check your connection and try again.');
       } else {
-        // Something else went wrong
         setError('Something went wrong. Please try again.');
       }
     } finally {

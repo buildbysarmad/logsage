@@ -78,8 +78,8 @@ public class SessionService(AppDbContext db)
                 Level = group.Level.ToString(),
                 Count = group.Count,
                 ExceptionType = group.ExceptionType,
-                FirstSeen = group.FirstSeen,
-                LastSeen = group.LastSeen
+                FirstSeen = group.FirstSeen.HasValue ? DateTime.SpecifyKind(group.FirstSeen.Value, DateTimeKind.Utc) : null,
+                LastSeen = group.LastSeen.HasValue ? DateTime.SpecifyKind(group.LastSeen.Value, DateTimeKind.Utc) : null
             });
         }
 
@@ -112,8 +112,8 @@ public class SessionService(AppDbContext db)
                 Level = group.Level.ToString(),
                 Count = group.Count,
                 ExceptionType = group.ExceptionType,
-                FirstSeen = group.FirstSeen,
-                LastSeen = group.LastSeen
+                FirstSeen = group.FirstSeen.HasValue ? DateTime.SpecifyKind(group.FirstSeen.Value, DateTimeKind.Utc) : null,
+                LastSeen = group.LastSeen.HasValue ? DateTime.SpecifyKind(group.LastSeen.Value, DateTimeKind.Utc) : null
             });
         }
 

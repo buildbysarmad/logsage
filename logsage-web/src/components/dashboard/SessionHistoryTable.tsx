@@ -1,28 +1,28 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import type { SessionSummary } from '@/lib/types';
-import { useReducedMotion, motionTransitions, staggerContainer } from '@/lib/motion';
+import { useState } from "react";
+import { motion } from "framer-motion";
+import type { SessionSummary } from "@/lib/types";
+import {
+  useReducedMotion,
+  motionTransitions,
+  staggerContainer,
+} from "@/lib/motion";
 
 interface Props {
   sessions: SessionSummary[];
 }
 
 export function SessionHistoryTable({ sessions }: Props) {
-  const router = useRouter();
   const [page, setPage] = useState(0);
   const pageSize = 20;
   const shouldReduceMotion = useReducedMotion();
 
-  const paginatedSessions = sessions.slice(page * pageSize, (page + 1) * pageSize);
+  const paginatedSessions = sessions.slice(
+    page * pageSize,
+    (page + 1) * pageSize,
+  );
   const totalPages = Math.ceil(sessions.length / pageSize);
-
-  const handleView = (sessionId: string) => {
-    // TODO: Load session in /analyze page
-    router.push(`/analyze?session=${sessionId}`);
-  };
 
   if (sessions.length === 0) {
     return (
@@ -32,7 +32,9 @@ export function SessionHistoryTable({ sessions }: Props) {
         animate={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
         transition={{ delay: 0.3, ...motionTransitions.smooth }}
       >
-        <h2 className="text-lg font-semibold text-white mb-4">Session history</h2>
+        <h2 className="text-lg font-semibold text-white mb-4">
+          Session history
+        </h2>
         <motion.div
           className="text-center py-8"
           initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.9 }}
@@ -69,13 +71,12 @@ export function SessionHistoryTable({ sessions }: Props) {
               <th className="text-left py-2 px-3 font-medium">Format</th>
               <th className="text-right py-2 px-3 font-medium">Lines</th>
               <th className="text-right py-2 px-3 font-medium">Errors</th>
-              <th className="text-center py-2 px-3 font-medium">Actions</th>
             </tr>
           </thead>
           <motion.tbody
             variants={shouldReduceMotion ? undefined : staggerContainer}
-            initial={shouldReduceMotion ? false : 'initial'}
-            animate={shouldReduceMotion ? false : 'animate'}
+            initial={shouldReduceMotion ? false : "initial"}
+            animate={shouldReduceMotion ? false : "animate"}
           >
             {paginatedSessions.map((session, index) => (
               <motion.tr
@@ -83,16 +84,23 @@ export function SessionHistoryTable({ sessions }: Props) {
                 className="border-b border-gray-800 hover:bg-gray-800/50 transition-colors"
                 initial={shouldReduceMotion ? false : { opacity: 0, x: -20 }}
                 animate={shouldReduceMotion ? false : { opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05, ...motionTransitions.smooth }}
-                whileHover={shouldReduceMotion ? {} : { backgroundColor: 'rgba(31, 41, 55, 0.5)' }}
+                transition={{
+                  delay: index * 0.05,
+                  ...motionTransitions.smooth,
+                }}
+                whileHover={
+                  shouldReduceMotion
+                    ? {}
+                    : { backgroundColor: "rgba(31, 41, 55, 0.5)" }
+                }
               >
                 <td className="py-2 px-3 text-gray-300">
-                  {new Date(session.createdAt).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
+                  {new Date(session.createdAt).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
                   })}
                 </td>
                 <td className="py-2 px-3">
@@ -106,18 +114,10 @@ export function SessionHistoryTable({ sessions }: Props) {
                 <td className="py-2 px-3 text-right">
                   <span className="text-red-400">{session.errorCount}</span>
                   {session.warningCount > 0 && (
-                    <span className="text-yellow-400 ml-2">+{session.warningCount}w</span>
+                    <span className="text-yellow-400 ml-2">
+                      +{session.warningCount}w
+                    </span>
                   )}
-                </td>
-                <td className="py-2 px-3 text-center">
-                  <motion.button
-                    onClick={() => handleView(session.id)}
-                    className="text-emerald-400 hover:text-emerald-300 text-xs font-medium transition-colors"
-                    whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
-                    whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}
-                  >
-                    View
-                  </motion.button>
                 </td>
               </motion.tr>
             ))}

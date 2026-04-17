@@ -75,6 +75,7 @@ export interface AnalysisResult {
   wasTruncated: boolean;
   errorGroups: ErrorGroup[];
   aiAnalysis: AiGroupAnalysis[];
+  sessionToken?: string;
 }
 
 export interface AuthTokens {

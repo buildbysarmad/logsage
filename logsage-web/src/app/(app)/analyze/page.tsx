@@ -9,6 +9,8 @@ import ErrorGroupSidebar from '@/components/analyze/ErrorGroupSidebar';
 import LogDetailPanel from '@/components/analyze/LogDetailPanel';
 import AiAnalysisPanel from '@/components/analyze/AiAnalysisPanel';
 import { AnimatedBackground } from '@/components/motion/AnimatedBackground';
+import { NewAnalysisButton } from '@/components/ui/NewAnalysisButton';
+import { FeedbackWidget } from '@/components/analyze/FeedbackWidget';
 import { useReducedMotion, motionVariants, motionTransitions } from '@/lib/motion';
 
 export default function AnalyzePage() {
@@ -343,23 +345,23 @@ export default function AnalyzePage() {
           )}
         </div>
 
-        {/* Prominent New Analysis Button */}
-        <motion.button
-          onClick={() => { setResult(null); setSelected(null); setPaste(''); setError(null); }}
-          className="relative flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-4 py-1.5 rounded-lg transition-all overflow-hidden group"
-          initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.9 }}
-          animate={shouldReduceMotion ? false : { opacity: 1, scale: 1 }}
-          transition={{ delay: 0.6, ...motionTransitions.springy }}
-          whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
-          whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}
-        >
-          <span className="text-lg">✨</span>
-          <span className="text-sm relative z-10">New Analysis</span>
+        {/* Feedback and New Analysis Button */}
+        <div className="flex items-center gap-4">
+          <FeedbackWidget sessionToken={result.sessionToken} />
+
           <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-emerald-400/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
-            initial={false}
-          />
-        </motion.button>
+            initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.9 }}
+            animate={shouldReduceMotion ? false : { opacity: 1, scale: 1 }}
+            transition={{ delay: 0.6, ...motionTransitions.springy }}
+          >
+            <NewAnalysisButton
+              onClick={() => { setResult(null); setSelected(null); setPaste(''); setError(null); }}
+              size="sm"
+            >
+              New Analysis
+            </NewAnalysisButton>
+          </motion.div>
+        </div>
       </motion.div>
 
       {/* 3-panel layout */}

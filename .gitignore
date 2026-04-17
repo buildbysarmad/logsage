@@ -3,7 +3,8 @@ bin/
 obj/
 *.user
 .vs/
-.vscode/
+/.vscode/
+logsage-backend/.vscode/
 *.suo
 appsettings.Development.json
 

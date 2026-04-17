@@ -60,7 +60,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.HasIndex(p => p.SessionToken);
             e.Property(p => p.SessionToken).HasMaxLength(64);
             e.Property(p => p.DetectedFormat).HasMaxLength(50);
-            e.Property(p => p.FeedbackNote).HasMaxLength(500);
         });
     }
 }

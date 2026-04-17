@@ -253,10 +253,6 @@ public static class AnalyzeEndpoints
         if (req.Score != 1 && req.Score != -1)
             return Results.BadRequest(new { error = "Score must be 1 (thumbs up) or -1 (thumbs down)" });
 
-        // Validate note length
-        if (req.Note?.Length > 500)
-            return Results.BadRequest(new { error = "Note exceeds 500 character limit" });
-
         // Check session exists
         var session = await repo.GetByTokenAsync(sessionToken, ct);
         if (session == null)
@@ -285,7 +281,7 @@ public static class AnalyzeEndpoints
         cache.Set(cacheKey, requests, TimeSpan.FromHours(1));
 
         // Update feedback
-        await repo.UpdateFeedbackAsync(sessionToken, req.Score, req.Note, ct);
+        await repo.UpdateFeedbackAsync(sessionToken, req.Score, ct);
 
         logger.LogInformation("Feedback received {SessionId} Score={Score}", session.Id, req.Score);
 

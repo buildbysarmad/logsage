@@ -33,6 +33,10 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# VS Code - allow team debug configs, ignore user settings
+.vscode/settings.local.json
+.vscode/
+
 # vercel
 .vercel
 

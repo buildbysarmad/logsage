@@ -36,7 +36,7 @@ public class FeedbackEndpointTests
         };
         await repo.CreateAsync(session);
 
-        var request = new FeedbackRequest(1, "Great tool!");
+        var request = new FeedbackRequest(1);
 
         // Act
         var result = await repo.GetByTokenAsync("test-token-123");
@@ -46,12 +46,11 @@ public class FeedbackEndpointTests
         Assert.Null(result.FeedbackScore);
 
         // Act - submit feedback
-        await repo.UpdateFeedbackAsync("test-token-123", request.Score, request.Note);
+        await repo.UpdateFeedbackAsync("test-token-123", request.Score);
         var updated = await repo.GetByTokenAsync("test-token-123");
 
         // Assert
         Assert.Equal(1, updated!.FeedbackScore);
-        Assert.Equal("Great tool!", updated.FeedbackNote);
         Assert.NotNull(updated.FeedbackAt);
     }
 
@@ -59,7 +58,7 @@ public class FeedbackEndpointTests
     public async Task SubmitFeedback_InvalidScore_ValidationRequired()
     {
         // Arrange
-        var request = new FeedbackRequest(5, "Invalid score");
+        var request = new FeedbackRequest(5);
 
         // Assert - validation should happen in endpoint
         // Score must be 1 or -1
@@ -86,7 +85,7 @@ public class FeedbackEndpointTests
         await repo.CreateAsync(session);
 
         // First feedback
-        await repo.UpdateFeedbackAsync("test-token-duplicate", 1, "First");
+        await repo.UpdateFeedbackAsync("test-token-duplicate", 1);
         var afterFirst = await repo.GetByTokenAsync("test-token-duplicate");
 
         // Assert - feedback exists
@@ -108,16 +107,6 @@ public class FeedbackEndpointTests
         Assert.Null(result);
     }
 
-    [Fact]
-    public async Task SubmitFeedback_NoteExceeds500Chars_ValidationRequired()
-    {
-        // Arrange
-        var longNote = new string('x', 501);
-        var request = new FeedbackRequest(1, longNote);
-
-        // Assert - validation should happen in endpoint
-        Assert.True(request.Note!.Length > 500);
-    }
 
     [Fact]
     public async Task SubmitFeedback_NegativeScore_IsValid()
@@ -139,11 +128,10 @@ public class FeedbackEndpointTests
         await repo.CreateAsync(session);
 
         // Act
-        await repo.UpdateFeedbackAsync("test-token-negative", -1, "Not helpful");
+        await repo.UpdateFeedbackAsync("test-token-negative", -1);
         var result = await repo.GetByTokenAsync("test-token-negative");
 
         // Assert
         Assert.Equal(-1, result!.FeedbackScore);
-        Assert.Equal("Not helpful", result.FeedbackNote);
     }
 }

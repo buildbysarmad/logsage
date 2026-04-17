@@ -68,7 +68,7 @@ namespace LogSage.Api.Migrations
 
                     b.HasIndex("SessionId");
 
-                    b.ToTable("ErrorGroups");
+                    b.ToTable("ErrorGroups", (string)null);
                 });
 
             modelBuilder.Entity("LogSage.Api.Data.Entities.ParseSession", b =>
@@ -96,10 +96,6 @@ namespace LogSage.Api.Migrations
 
                     b.Property<DateTime?>("FeedbackAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("FeedbackNote")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
 
                     b.Property<int?>("FeedbackScore")
                         .HasColumnType("integer");
@@ -140,7 +136,7 @@ namespace LogSage.Api.Migrations
 
                     b.HasIndex("SessionToken");
 
-                    b.ToTable("ParseSessions");
+                    b.ToTable("ParseSessions", (string)null);
                 });
 
             modelBuilder.Entity("LogSage.Api.Data.Entities.RefreshToken", b =>
@@ -172,7 +168,7 @@ namespace LogSage.Api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RefreshTokens");
+                    b.ToTable("RefreshTokens", (string)null);
                 });
 
             modelBuilder.Entity("LogSage.Api.Data.Entities.Session", b =>
@@ -203,7 +199,7 @@ namespace LogSage.Api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Sessions");
+                    b.ToTable("Sessions", (string)null);
                 });
 
             modelBuilder.Entity("LogSage.Api.Data.Entities.Subscription", b =>
@@ -260,7 +256,7 @@ namespace LogSage.Api.Migrations
 
                     b.HasIndex("UserId", "Provider");
 
-                    b.ToTable("Subscriptions");
+                    b.ToTable("Subscriptions", (string)null);
                 });
 
             modelBuilder.Entity("LogSage.Api.Data.Entities.UsageTracking", b =>
@@ -284,7 +280,7 @@ namespace LogSage.Api.Migrations
                     b.HasIndex("Identifier", "Date")
                         .IsUnique();
 
-                    b.ToTable("UsageTracking");
+                    b.ToTable("UsageTracking", (string)null);
                 });
 
             modelBuilder.Entity("LogSage.Api.Data.Entities.User", b =>
@@ -324,7 +320,7 @@ namespace LogSage.Api.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("LogSage.Api.Data.Entities.ErrorGroupEntity", b =>

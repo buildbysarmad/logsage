@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useReducedMotion } from '@/lib/motion';
+import { NewAnalysisButton } from '@/components/ui/NewAnalysisButton';
 
 const pricingEnabled = process.env.NEXT_PUBLIC_PRICING_ENABLED === 'true';
 
@@ -110,37 +111,9 @@ export default function PricingPage() {
             animate={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
             transition={{ delay: 0.7, duration: 0.5 }}
           >
-            <Link
-              href="/analyze"
-              className="group relative inline-block"
-            >
-              <motion.div
-                className="relative bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-semibold px-10 py-4 rounded-xl transition-all overflow-hidden"
-                whileHover={shouldReduceMotion ? {} : { scale: 1.05, y: -2 }}
-                whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  Start analyzing logs
-                  <motion.span
-                    animate={shouldReduceMotion ? {} : { x: [0, 5, 0] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                  >
-                    →
-                  </motion.span>
-                </span>
-
-                {!shouldReduceMotion && (
-                  <>
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0"
-                      animate={{ x: ['-100%', '100%'] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                    />
-                    <div className="absolute -inset-1 bg-gradient-to-r from-emerald-600 to-green-600 rounded-xl blur opacity-30 group-hover:opacity-60 transition-opacity -z-10" />
-                  </>
-                )}
-              </motion.div>
-            </Link>
+            <NewAnalysisButton href="/analyze" size="lg">
+              Start analyzing logs
+            </NewAnalysisButton>
           </motion.div>
 
           <motion.div
