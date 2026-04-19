@@ -7,6 +7,7 @@ namespace LogSage.Core.Tests.Parsers;
 public class SerilogParserTests
 {
     private readonly SerilogFormatParser _parser = new();
+    private readonly SerilogCompactParser _compactParser = new();
 
     [Fact]
     public void CanParse_WithRealWorldSerilogFormat_ReturnsTrue()
@@ -244,5 +245,81 @@ public class SerilogParserTests
 
         Assert.Single(entries);
         Assert.Equal("123", entries[0].RequestId);
+    }
+
+    // SerilogCompactParser tests for new patterns
+
+    [Fact]
+    public void SerilogCompactParser_CanParse_TimeOnlyFormat_ReturnsTrue()
+    {
+        const string sample = """
+            22:43:04.863 +05:00 [Information] [Microsoft.Hosting.Lifetime] Now listening on: "https://localhost:7088"
+            22:43:04.948 +05:00 [Information] [Microsoft.Hosting.Lifetime] Now listening on: "http://localhost:5088"
+            """;
+        Assert.True(_compactParser.CanParse(sample));
+    }
+
+    [Fact]
+    public void SerilogCompactParser_Parse_TimeOnlyFormat_ParsesCorrectly()
+    {
+        const string log = """
+            22:43:04.863 +05:00 [Information] [Microsoft.Hosting.Lifetime] Now listening on: "https://localhost:7088"
+            22:43:04.948 +05:00 [Information] [Microsoft.Hosting.Lifetime] Now listening on: "http://localhost:5088"
+            """;
+
+        var entries = _compactParser.ParseStructured(log).ToList();
+
+        Assert.Equal(2, entries.Count);
+        Assert.Equal(LogLevel.Info, entries[0].Level);
+        Assert.Equal("Now listening on: \"https://localhost:7088\"", entries[0].Message);
+        Assert.Equal(LogLevel.Info, entries[1].Level);
+        Assert.Equal("Now listening on: \"http://localhost:5088\"", entries[1].Message);
+    }
+
+    [Fact]
+    public void SerilogCompactParser_CanParse_CustomSeparatorFormat_ReturnsTrue()
+    {
+        const string sample = """
+            [Warning] 28-06 02:35:34 || Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data
+            [Information] 28-06 02:35:34 || Executed DbCommand ("2"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+            """;
+        Assert.True(_compactParser.CanParse(sample));
+    }
+
+    [Fact]
+    public void SerilogCompactParser_Parse_CustomSeparatorFormat_ParsesCorrectly()
+    {
+        const string log = """
+            [Warning] 28-06 02:35:34 || Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data
+            [Information] 28-06 02:35:34 || Executed DbCommand ("2"ms)
+            """;
+
+        var entries = _compactParser.ParseStructured(log).ToList();
+
+        Assert.Equal(2, entries.Count);
+        Assert.Equal(LogLevel.Warning, entries[0].Level);
+        Assert.Contains("Sensitive data logging is enabled", entries[0].Message);
+        Assert.Equal(LogLevel.Info, entries[1].Level);
+        Assert.Contains("Executed DbCommand", entries[1].Message);
+    }
+
+    [Fact]
+    public void SerilogCompactParser_Parse_TimeOnlyFormatWithMultipleEntries_ParsesCorrectly()
+    {
+        const string log = """
+            22:43:04.863 +05:00 [Information] [Microsoft.Hosting.Lifetime] Now listening on: "https://localhost:7088"
+            22:43:04.948 +05:00 [Information] [Microsoft.Hosting.Lifetime] Now listening on: "http://localhost:5088"
+            22:43:19.953 +05:00 [Error] [Logging_Serilog.Controllers.WeatherForecastController] Error in Divide Method
+            """;
+
+        var entries = _compactParser.ParseStructured(log).ToList();
+
+        Assert.Equal(3, entries.Count);
+        Assert.Equal(LogLevel.Info, entries[0].Level);
+        Assert.Contains("https://localhost:7088", entries[0].Message);
+        Assert.Equal(LogLevel.Info, entries[1].Level);
+        Assert.Contains("http://localhost:5088", entries[1].Message);
+        Assert.Equal(LogLevel.Error, entries[2].Level);
+        Assert.Contains("Error in Divide Method", entries[2].Message);
     }
 }

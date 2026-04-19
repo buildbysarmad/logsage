@@ -258,10 +258,6 @@ public static class AnalyzeEndpoints
         if (session == null)
             return Results.NotFound(new { error = "Session not found" });
 
-        // Check if feedback already exists
-        if (session.FeedbackScore.HasValue)
-            return Results.Conflict(new { error = "Feedback already submitted for this session" });
-
         // Rate limiting: 10 requests per IP per hour
         var ip = ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown";
         var cacheKey = $"feedback_ratelimit_{ip}";
