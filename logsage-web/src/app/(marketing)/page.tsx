@@ -25,8 +25,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-gray-800 py-12 text-center">
         <p className="text-gray-600 text-sm mb-4">
-          log<span className="text-emerald-400">sage</span>.dev — built by{' '}
-          <span className="text-gray-500">buildbysarmad (An indie dev!)</span>
+          log<span className="text-emerald-400">sage</span>.dev &copy; {new Date().getFullYear()} All rights reserved.
         </p>
         <p className="text-gray-700 text-xs">
           Stop debugging in the dark. Start analyzing logs smarter.

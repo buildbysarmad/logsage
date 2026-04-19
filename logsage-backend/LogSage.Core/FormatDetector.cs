@@ -10,11 +10,14 @@ public class FormatDetector
     {
         _parsers =
         [
-            new SerilogFormatParser(),
+            new SerilogJsonParser(),      // JSON/CLEF — most specific, check first
+            new SerilogFormatParser(),    // Standard Serilog text format
+            new SerilogCompactParser(),   // Serilog compact text variants
             new NLogFormatParser(),
             new Log4NetFormatParser(),
+            new AspNetCoreFormatParser(), // ASP.NET Core default format (level: Category[EventId])
             new StandardFormatParser(),
-            new PlainTextParser()   // always last — fallback
+            new PlainTextParser()         // always last — fallback
         ];
     }
 
