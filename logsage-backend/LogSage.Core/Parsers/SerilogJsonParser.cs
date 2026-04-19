@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text.Json;
 using LogSage.Core.Models;
 
@@ -38,9 +39,8 @@ public class SerilogJsonParser : BaseStructuredLogParser, ILogParser
         var lines = sampleLines.Split('\n').Take(10);
         var matchCount = 0;
 
-        foreach (var line in lines)
+        foreach (var trimmed in lines.Select(line => line.Trim()))
         {
-            var trimmed = line.Trim();
             if (string.IsNullOrWhiteSpace(trimmed)) continue;
 
             try
