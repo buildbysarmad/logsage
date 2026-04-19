@@ -95,9 +95,9 @@ public class SerilogJsonParser : BaseStructuredLogParser, ILogParser
                     timestamp = ts;
                 }
                 else if (root.TryGetProperty("@t", out var clefTsElement) &&
-                         DateTime.TryParse(clefTsElement.GetString(), out var ts))
+                         DateTime.TryParse(clefTsElement.GetString(), out var clefTs))
                 {
-                    timestamp = ts;
+                    timestamp = clefTs;
                 }
 
                 // Extract level (standard or CLEF format)
