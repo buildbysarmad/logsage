@@ -68,7 +68,7 @@ namespace LogSage.Api.Migrations
 
                     b.HasIndex("SessionId");
 
-                    b.ToTable("ErrorGroups", (string)null);
+                    b.ToTable("ErrorGroups");
                 });
 
             modelBuilder.Entity("LogSage.Api.Data.Entities.ParseSession", b =>
@@ -107,9 +107,16 @@ namespace LogSage.Api.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("InputSample")
-                        .HasColumnType("text");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<int>("InputSizeBytes")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Metadata")
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("Outcome")
                         .HasColumnType("integer");
 
                     b.Property<int>("ParseErrorCount")
@@ -136,7 +143,7 @@ namespace LogSage.Api.Migrations
 
                     b.HasIndex("SessionToken");
 
-                    b.ToTable("ParseSessions", (string)null);
+                    b.ToTable("ParseSessions");
                 });
 
             modelBuilder.Entity("LogSage.Api.Data.Entities.RefreshToken", b =>
@@ -168,7 +175,7 @@ namespace LogSage.Api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RefreshTokens", (string)null);
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("LogSage.Api.Data.Entities.Session", b =>
@@ -199,7 +206,7 @@ namespace LogSage.Api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Sessions", (string)null);
+                    b.ToTable("Sessions");
                 });
 
             modelBuilder.Entity("LogSage.Api.Data.Entities.Subscription", b =>
@@ -256,7 +263,7 @@ namespace LogSage.Api.Migrations
 
                     b.HasIndex("UserId", "Provider");
 
-                    b.ToTable("Subscriptions", (string)null);
+                    b.ToTable("Subscriptions");
                 });
 
             modelBuilder.Entity("LogSage.Api.Data.Entities.UsageTracking", b =>
@@ -280,7 +287,7 @@ namespace LogSage.Api.Migrations
                     b.HasIndex("Identifier", "Date")
                         .IsUnique();
 
-                    b.ToTable("UsageTracking", (string)null);
+                    b.ToTable("UsageTracking");
                 });
 
             modelBuilder.Entity("LogSage.Api.Data.Entities.User", b =>
@@ -295,6 +302,9 @@ namespace LogSage.Api.Migrations
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsAdmin")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -320,7 +330,7 @@ namespace LogSage.Api.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("LogSage.Api.Data.Entities.ErrorGroupEntity", b =>

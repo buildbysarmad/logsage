@@ -334,7 +334,10 @@ public static class AnalyzeEndpoints
             var parseSession = new ParseSession
             {
                 SessionToken = sessionToken,
-                InputSample = sanitized.Sample,
+                // Limit sample to 500 chars to reduce storage (95% reduction)
+                InputSample = sanitized.Sample?.Length > 500
+                    ? sanitized.Sample[..500]
+                    : sanitized.Sample,
                 InputLineCount = sanitized.TotalLines,
                 InputSizeBytes = sanitized.TotalBytes,
                 DetectedFormat = result.DetectedFormat,
@@ -346,15 +349,16 @@ public static class AnalyzeEndpoints
                 DebugCount = result.DebugCount,
                 ParseErrorCount = result.ParseErrorCount,
                 ParseErrorSamples = errorSamplesJson,
-                DurationMs = durationMs
+                DurationMs = durationMs,
+                Outcome = ParseSession.CalculateOutcome(result.ParsedEntries, sanitized.TotalLines)
             };
 
             await repo.CreateAsync(parseSession, ct);
 
             logger.LogInformation(
-                "ParseSession created {SessionId} Format={DetectedFormat} Entries={TotalEntries} ParseSuccess={ParseSuccess} DurationMs={DurationMs}",
+                "ParseSession created {SessionId} Format={DetectedFormat} Entries={TotalEntries} Outcome={Outcome} SuccessRate={SuccessRate:F2}% DurationMs={DurationMs}",
                 parseSession.Id, parseSession.DetectedFormat, parseSession.TotalEntries,
-                parseSession.ParseSuccess, parseSession.DurationMs);
+                parseSession.Outcome, parseSession.SuccessRate, parseSession.DurationMs);
         }
         catch (Exception ex)
         {
@@ -378,7 +382,10 @@ public static class AnalyzeEndpoints
             var parseSession = new ParseSession
             {
                 SessionToken = sessionToken,
-                InputSample = sanitized.Sample,
+                // Limit sample to 500 chars to reduce storage (95% reduction)
+                InputSample = sanitized.Sample?.Length > 500
+                    ? sanitized.Sample[..500]
+                    : sanitized.Sample,
                 InputLineCount = sanitized.TotalLines,
                 InputSizeBytes = sanitized.TotalBytes,
                 DetectedFormat = result.DetectedFormat,
@@ -390,15 +397,16 @@ public static class AnalyzeEndpoints
                 DebugCount = result.DebugCount,
                 ParseErrorCount = result.ParseErrorCount,
                 ParseErrorSamples = errorSamplesJson,
-                DurationMs = durationMs
+                DurationMs = durationMs,
+                Outcome = ParseSession.CalculateOutcome(result.ParsedEntries, sanitized.TotalLines)
             };
 
             await repo.CreateAsync(parseSession, ct);
 
             logger.LogInformation(
-                "ParseSession created {SessionId} Format={DetectedFormat} Entries={TotalEntries} ParseSuccess={ParseSuccess} DurationMs={DurationMs}",
+                "ParseSession created {SessionId} Format={DetectedFormat} Entries={TotalEntries} Outcome={Outcome} SuccessRate={SuccessRate:F2}% DurationMs={DurationMs}",
                 parseSession.Id, parseSession.DetectedFormat, parseSession.TotalEntries,
-                parseSession.ParseSuccess, parseSession.DurationMs);
+                parseSession.Outcome, parseSession.SuccessRate, parseSession.DurationMs);
         }
         catch (Exception ex)
         {

@@ -49,9 +49,21 @@ builder.Host.UseSerilog((ctx, services, lc) =>
         .Enrich.WithEnvironmentName()
         .Enrich.WithThreadId()
         .Enrich.WithProcessId()
-        .Enrich.WithProperty("Application", "LogSage.Api")
-        .WriteTo.Console(outputTemplate:
+        .Enrich.WithProperty("Application", "LogSage.Api");
+
+    // Railway deployment: use CompactJsonFormatter for structured logging
+    // This works with Railway's ephemeral filesystem and enables log parsing in Grafana Loki
+    if (ctx.HostingEnvironment.IsProduction())
+    {
+        loggerConfig.WriteTo.Console(
+            new Serilog.Formatting.Compact.CompactJsonFormatter());
+    }
+    else
+    {
+        // Development: use human-readable format
+        loggerConfig.WriteTo.Console(outputTemplate:
             "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
+    }
 
     // Only configure Grafana Loki if URL is provided
     var lokiUrl = ctx.Configuration["Grafana:LokiUrl"];
@@ -199,6 +211,7 @@ app.MapHealthChecks("/health");
 app.MapGet("/favicon.ico", () => Results.NoContent()).ExcludeFromDescription();
 app.MapAnalyzeEndpoints();
 app.MapAuthEndpoints();
+app.MapAdminEndpoints();
 
 // Only register billing endpoints when pricing is enabled
 if (app.Configuration.GetValue<bool>("PRICING_ENABLED"))

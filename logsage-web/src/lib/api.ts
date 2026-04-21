@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import type { AnalysisResult, AuthTokens, User, SessionSummary } from './types';
+import type { AnalysisResult, AuthTokens, User, SessionSummary, AdminAnalytics } from './types';
 
 const createApiClient = (): AxiosInstance => {
   const instance = axios.create({
@@ -151,4 +151,11 @@ export const billingApi = {
 
   portal: () =>
     api.get<{ portalUrl: string }>('/api/billing/portal'),
+};
+
+export const adminApi = {
+  getAnalytics: (days: number = 30) =>
+    api.get<AdminAnalytics>('/api/admin/analytics', {
+      params: { days },
+    }),
 };

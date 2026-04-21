@@ -96,7 +96,9 @@ public static class AuthEndpoints
         var createdAtStr = ctx.User.FindFirst("createdAt")?.Value;
         DateTime? createdAt = createdAtStr != null && DateTime.TryParse(createdAtStr, out var dt) ? dt : null;
 
-        return Results.Ok(new UserResponse(userId, email, plan, createdAt));
+        var isAdmin = ctx.User.IsInRole("admin");
+
+        return Results.Ok(new UserResponse(userId, email, plan, createdAt, isAdmin));
     }
 
     internal static async Task<IResult> ChangePassword(
@@ -132,15 +134,21 @@ public static class AuthEndpoints
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Secret"]!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        var claims = new[] {
+        var claims = new List<Claim> {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(ClaimTypes.Email, user.Email),
             new Claim("plan", user.Plan),
             new Claim("createdAt", user.CreatedAt.ToString("O"))
         };
+
+        // Add admin role claim if user is admin
+        if (user.IsAdmin)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, "admin"));
+        }
         var accessToken = new JwtSecurityTokenHandler().WriteToken(
             new JwtSecurityToken(config["Jwt:Issuer"], config["Jwt:Audience"],
-                claims, expires: DateTime.UtcNow.AddMinutes(15), signingCredentials: creds));
+                claims.ToArray(), expires: DateTime.UtcNow.AddMinutes(15), signingCredentials: creds));
 
         var refreshToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         db.RefreshTokens.Add(new RefreshToken {

@@ -6,6 +6,7 @@ public class User
     public string Email { get; set; } = string.Empty;
     public string PasswordHash { get; set; } = string.Empty;
     public string Plan { get; set; } = "free";
+    public bool IsAdmin { get; set; } = false;  // Admin role for analytics dashboard
     public string? PaymentCustomerId { get; set; }
     public string? PaymentProvider { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
