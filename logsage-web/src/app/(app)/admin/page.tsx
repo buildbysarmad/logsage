@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { adminApi, authApi } from '@/lib/api';
 import type { AdminAnalytics } from '@/lib/types';
@@ -30,7 +30,7 @@ export default function AdminPage() {
           return;
         }
         setCheckingAuth(false);
-      } catch (err) {
+      } catch {
         router.push('/login?redirect=/admin');
       }
     };
@@ -38,15 +38,16 @@ export default function AdminPage() {
     checkAdmin();
   }, [user, router]);
 
-  const handleFetchAnalytics = async () => {
+  const handleFetchAnalytics = useCallback(async () => {
     setLoading(true);
     setError('');
 
     try {
       const response = await adminApi.getAnalytics(days);
       setAnalytics(response.data);
-    } catch (err: any) {
-      if (err.response?.status === 401 || err.response?.status === 403) {
+    } catch (err: unknown) {
+      const error = err as { response?: { status?: number } };
+      if (error.response?.status === 401 || error.response?.status === 403) {
         setError('Unauthorized. Admin access required.');
         router.push('/dashboard');
       } else {
@@ -56,14 +57,14 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [days, router]);
 
   // Auto-fetch on mount
   useEffect(() => {
     if (!checkingAuth) {
       handleFetchAnalytics();
     }
-  }, [checkingAuth]);
+  }, [checkingAuth, handleFetchAnalytics]);
 
   if (checkingAuth) {
     return (
