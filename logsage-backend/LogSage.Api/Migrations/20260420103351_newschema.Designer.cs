@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LogSage.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260404090515_RenameStripeCustomerIdToPaymentCustomerId")]
-    partial class RenameStripeCustomerIdToPaymentCustomerId
+    [Migration("20260420103351_newschema")]
+    partial class newschema
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -72,6 +72,81 @@ namespace LogSage.Api.Migrations
                     b.HasIndex("SessionId");
 
                     b.ToTable("ErrorGroups");
+                });
+
+            modelBuilder.Entity("LogSage.Api.Data.Entities.ParseSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DebugCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("DetectedFormat")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("DurationMs")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ErrorCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("FeedbackAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("FeedbackScore")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("InfoCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("InputLineCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("InputSample")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("InputSizeBytes")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Metadata")
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("Outcome")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ParseErrorCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ParseErrorSamples")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("ParseSuccess")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("SessionToken")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<int>("TotalEntries")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("WarningCount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SessionToken");
+
+                    b.ToTable("ParseSessions");
                 });
 
             modelBuilder.Entity("LogSage.Api.Data.Entities.RefreshToken", b =>
@@ -230,6 +305,9 @@ namespace LogSage.Api.Migrations
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsAdmin")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()

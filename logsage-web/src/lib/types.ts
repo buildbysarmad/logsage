@@ -87,6 +87,7 @@ export interface User {
   id: string;
   email: string;
   plan: 'free' | 'pro' | 'team';
+  isAdmin: boolean;
   createdAt?: string;
 }
 
@@ -97,4 +98,40 @@ export interface SessionSummary {
   errorCount: number;
   warningCount: number;
   createdAt: string;
+}
+
+export interface AnalyticsOverview {
+  totalSessions: number;
+  averageSuccessRate: number;
+  totalErrorsDetected: number;
+  uniqueFormatsDetected: number;
+  totalBytesProcessed: number;
+  averageDurationMs: number;
+}
+
+export interface DailyStats {
+  date: string;
+  sessionCount: number;
+  averageSuccessRate: number;
+  totalErrors: number;
+}
+
+export interface FormatBreakdown {
+  format: string;
+  count: number;
+  percentage: number;
+}
+
+export interface OutcomeBreakdown {
+  outcome: string;
+  count: number;
+  percentage: number;
+  averageSuccessRate: number;
+}
+
+export interface AdminAnalytics {
+  overview: AnalyticsOverview;
+  dailyTrend: DailyStats[];
+  formatBreakdown: FormatBreakdown[];
+  outcomeBreakdown: OutcomeBreakdown[];
 }

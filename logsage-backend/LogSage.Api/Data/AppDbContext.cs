@@ -60,6 +60,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.HasIndex(p => p.SessionToken);
             e.Property(p => p.SessionToken).HasMaxLength(64);
             e.Property(p => p.DetectedFormat).HasMaxLength(50);
+            e.Property(p => p.InputSample).HasMaxLength(500);
+            // Store Metadata as JSONB for efficient querying in PostgreSQL
+            e.Property(p => p.Metadata).HasColumnType("jsonb");
         });
     }
 }
